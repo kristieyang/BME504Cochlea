@@ -1,0 +1,96 @@
+//Myelinated Axon
+//help from http://www.neuron.yale.edu/phpBB/viewtopic.php?f=15&t=2653&p=10618&hilit=myelinated+axon#p10618
+
+load_file("nrngui.hoc")
+load_proc("nrnmainmenu")
+
+create node[1], internode[1]
+objref nodes, internodes
+
+vinit = -65 //mV
+// buildaxon creates an axon that has 21 compartments, 20 nodes
+
+proc buildaxon() {local k
+    nnode = $1
+    create node[nnode], internode[nnode-1]
+    nodes = new SectionList()
+    internodes = new SectionList()
+    forsec "node" nodes.append
+    forsec "internodes" internodes.append
+    access node[0]
+    for k = 0, nnode-2{
+        connect internode[k](0),node[k](1)
+        connect node[k+1](0),internode[k](0)
+    }
+    
+    forsec internodes {nseg = 10}
+}
+
+proc physprop(){
+    forsec nodes{
+        diam = 7.2//um
+        L = 1//um
+    }
+    
+    forsec internodes{
+        diam = 12 //um
+        L = 1200 //um
+    }
+}
+
+proc membprop(){
+    forsec nodes{
+        Ra = 100
+        cm = 1
+        insert hh
+    }
+    
+    forsec internodes{
+        Ra = 100
+        cm = 0.005
+        insert pas
+        e_pas = -65
+        g_pas = 1/1000
+    }
+}
+
+
+proc make() {
+    buildaxon($1)
+    physprop($2)
+    membprop()
+}
+
+make(21,2000) //create 21 nodes and 20 internodes
+
+forall{
+    Psi_10 = 5.63*10^(-6)
+    Psi_100 = 8.87*10^(-6)
+}
+
+Vm = Psi_10*pi
+/*
+//Create an intracellular stimulus
+objectvar stim1
+soma stim1 = new IClamp(0.5)
+stim1.del = 0   //Apply stimulus immediately
+stim1.dur = 10    //Stimulus duration = 200 us
+stim1.amp = 5  //2*Vth to evoke AP (units of nA)
+
+tstop = 40      //stop the stimulus after 10 ms
+
+objref p, vsoma, vaxon
+p = new Graph()
+p.size(0,tstop,-90,20)
+//p.label(0.3,0,"Time (ms)")
+//p.label(0,0.5,"Current (mA/cm2)")
+vsoma = new Vector()
+vaxon = new Vector()
+
+vsoma.record(&soma.v(.5))
+vaxon.record(&axon.v(.5))
+*/
+run()
+//vaxon.plot(p,dt,3,1)
+
+

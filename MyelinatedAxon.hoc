@@ -68,29 +68,28 @@ forall{
     Psi_100 = 8.87*10^(-6)
 }
 
-Vm = Psi_10*pi
-/*
+
 //Create an intracellular stimulus
-objectvar stim1
-soma stim1 = new IClamp(0.5)
-stim1.del = 0   //Apply stimulus immediately
-stim1.dur = 10    //Stimulus duration = 200 us
-stim1.amp = 5  //2*Vth to evoke AP (units of nA)
+objectvar stim
+node[10] stim = new IClamp(0.5)
+stim.del = 1   //Apply stimulus immediately
+stim.dur = 10    //Stimulus duration = 200 us
+stim.amp = 5  //2*Vth to evoke AP (units of nA)
 
 tstop = 40      //stop the stimulus after 10 ms
 
-objref p, vsoma, vaxon
+objref p, vnodes, vinternodes
 p = new Graph()
-p.size(0,tstop,-90,20)
+p.size(0,tstop,-90,50)
 //p.label(0.3,0,"Time (ms)")
 //p.label(0,0.5,"Current (mA/cm2)")
-vsoma = new Vector()
-vaxon = new Vector()
+vnodes = new Vector()
+vinternodes = new Vector()
 
-vsoma.record(&soma.v(.5))
-vaxon.record(&axon.v(.5))
-*/
+vnodes.record(&node[1].v(.5))
+vinternodes.record(&internode[1].v(.5))
+
 run()
-//vaxon.plot(p,dt,3,1)
-
+vnodes.plot(p,dt,3,2)
+vinternodes.plot(p,dt,2,1)
 

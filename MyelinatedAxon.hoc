@@ -63,11 +63,6 @@ proc make() {
 
 make(21,2000) //create 21 nodes and 20 internodes
 
-forall{
-    Psi_10 = 5.63*10^(-6)
-    Psi_100 = 8.87*10^(-6)
-}
-
 
 //Create an intracellular stimulus
 objectvar stim

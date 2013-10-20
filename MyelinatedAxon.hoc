@@ -28,24 +28,26 @@ proc buildaxon() {local k
 
 proc physprop(){
     forsec nodes{
-        diam = 7.2//um
-        L = 1//um
+        diam = 0.7*1.4//um
+        l = 1//µm
     }
     
     forsec internodes{
-        diam = 12 //um
-        L = 1200 //um
+        diam = 1.4 //um
+        L = 100 //um
     }
 }
 
 proc membprop(){
     forsec nodes{
+        Rm = 1000
         Ra = 100
         cm = 1
         insert hh
     }
     
     forsec internodes{
+        Rm = 292600
         Ra = 100
         cm = 0.005
         insert pas
@@ -66,10 +68,10 @@ make(21,2000) //create 21 nodes and 20 internodes
 
 //Create an intracellular stimulus
 objectvar stim
-node[10] stim = new IClamp(0.5)
+node[20] stim = new IClamp(0.5)
 stim.del = 1   //Apply stimulus immediately
-stim.dur = 10    //Stimulus duration = 200 us
-stim.amp = 5  //2*Vth to evoke AP (units of nA)
+stim.dur = .2    //Stimulus duration = 200 us
+stim.amp = 1  //2*Vth to evoke AP (units of nA)
 
 tstop = 40      //stop the stimulus after 10 ms
 
@@ -81,8 +83,8 @@ p.size(0,tstop,-90,50)
 vnodes = new Vector()
 vinternodes = new Vector()
 
-vnodes.record(&node[1].v(.5))
-vinternodes.record(&internode[1].v(.5))
+vnodes.record(&node[19].v(.5))
+vinternodes.record(&internode[19].v(.5))
 
 run()
 vnodes.plot(p,dt,3,2)

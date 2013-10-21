@@ -23,7 +23,7 @@ proc buildaxon() {local k
         connect node[k+1](0),internode[k](0)
     }
     
-    forsec internodes {nseg = 10}
+    forsec internodes {nseg = 1}
 }
 
 proc physprop(){
@@ -34,11 +34,12 @@ proc physprop(){
     
     forsec internodes{
         diam = 1.4 //um
-        L = 100 //um
+        L = 10 //um
     }
 }
 
 proc membprop(){
+    
     forsec nodes{
         Rm = 1000
         Ra = 100
@@ -63,17 +64,17 @@ proc make() {
     membprop()
 }
 
-make(21,2000) //create 21 nodes and 20 internodes
+make(21,10) //create 21 nodes and 20 internodes
 
 
 //Create an intracellular stimulus
 objectvar stim
-node[20] stim = new IClamp(0.5)
+internode[10] stim = new IClamp(0.5)
 stim.del = 1   //Apply stimulus immediately
 stim.dur = .2    //Stimulus duration = 200 us
 stim.amp = 1  //2*Vth to evoke AP (units of nA)
 
-tstop = 40      //stop the stimulus after 10 ms
+tstop = 2
 
 objref p, vnodes, vinternodes
 p = new Graph()
@@ -83,10 +84,19 @@ p.size(0,tstop,-90,50)
 vnodes = new Vector()
 vinternodes = new Vector()
 
-vnodes.record(&node[19].v(.5))
-vinternodes.record(&internode[19].v(.5))
+vnodes.record(&node[10].v(.5))
+vinternodes.record(&internode[10].v(.5))
 
 run()
 vnodes.plot(p,dt,3,2)
 vinternodes.plot(p,dt,2,1)
+
+objectvar rvp, g
+
+rvp = new RangeVarPlot("v")
+node[1] rvp.begin(0)
+node[20] rvp.end(1)
+g = new Graph()
+g.addobject(rvp)
+g.size(rvp.left(), rvp.right(),-90,50)
 

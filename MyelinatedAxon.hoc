@@ -68,7 +68,7 @@ make(21,2000) //create 21 nodes and 20 internodes
 
 //Create an intracellular stimulus
 objectvar stim
-node[20] stim = new IClamp(0.5)
+node[10] stim = new IClamp(0.5)
 stim.del = 1   //Apply stimulus immediately
 stim.dur = .2    //Stimulus duration = 200 us
 stim.amp = 1  //2*Vth to evoke AP (units of nA)
@@ -86,6 +86,14 @@ vinternodes = new Vector()
 vnodes.record(&node[19].v(.5))
 vinternodes.record(&internode[19].v(.5))
 
+/*
+objectvar rvp, g
+rvp = new RangeVarPlot("v")
+rvp.begin(0)
+rvp.end(1)
+g = new Graph()
+g.addobject(rvp)
+*/
 run()
 vnodes.plot(p,dt,3,2)
 vinternodes.plot(p,dt,2,1)

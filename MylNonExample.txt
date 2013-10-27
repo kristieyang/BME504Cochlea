@@ -75,7 +75,7 @@ proc make() {
 }
 
 proc addnonmyel() {
-    connect nonmyel(0), node[$1-1](0)
+    connect nonmyel(0), node[$1-1](1)
     nonmyel {
         nseg = 10*$1 + 1 // so it has a node at 0.5
         diam = 10

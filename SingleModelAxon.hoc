@@ -23,35 +23,16 @@ proc buildaxon() {local k
     }
     
     forsec internodes {nseg = 10}
-    //FEM Mechanism
-    //forall { for(x,0) set e_extracellular(x) = 0 }
-}
 
-proc physprop(){
-
-    forsec internodes {
-
-        diam = 0.7*1.4  //Axon diameter, µm
-        L = 100*1.4     //Internode length
-        Ra = 100 //*
-        cm = 0   //*
-
-    }
-    
-    forsec nodes {
-        Ra = 100 //*
-        cm = 2   //*
-        L = 1.5 //µm
-        insert pas
-        g_pas = 0.0002
-        e_pas = -70.0
-            }
 }
 
 proc membprop(){
 
-    
     forsec nodes {
+        Ra = 100 //*
+        cm = 2   //*
+        L = 1.5 //µm
+        insert hh
         insert extracellular {
             xg[0]=1e10
             xg[1]=1e10
@@ -60,13 +41,28 @@ proc membprop(){
             xraxial[0]=1e20
             xraxial[1]=1e20
             e_extracellular=0
-        } }
+        }
+    }
 
     
     forsec internodes {
+        insert pas
+        g_pas = 0.0002
+        e_pas = -70.0
+        diam = 0.7*1.4  //Axon diameter, µm
+        L = 100*1.4     //Internode length
+        Ra = 100 //*
+        cm = 0   //*
         insert extracellular {
+            xg[0]=1e9
+            xg[1]=1e9
+            xc[0]=0
+            xc[1]=0
+            xraxial[0]=1e20
+            xraxial[1]=1e20
             e_extracellular=0
-        } }
+        }
+    }
 
 }
 
@@ -74,19 +70,16 @@ proc membprop(){
 proc make() {
     buildaxon($1)
     membprop()
-    physprop()
-
 }
 
 make(21) //create 21 nodes and 20 internodes
-
 
 //Create an intracellular stimulus
 objectvar stim
 node[10] stim = new IClamp(0.5)
 stim.del = 1   //Apply stimulus immediately
 stim.dur = .2    //Stimulus duration = 200 us
-stim.amp = 100  //2*Vth to evoke AP (units of nA)
+stim.amp = 10  //2*Vth to evoke AP (units of nA)
 
 tstop = 20
 

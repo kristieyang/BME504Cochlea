@@ -17,7 +17,7 @@ proc buildaxon() {local k
     forsec "node" nodes.append
     access node[0]
     for k = 0, nnode-2{
-        connect node[k](1),node[k+1](0)
+        connect node[k+1](1),node[k](0)
     }
 }
 
@@ -35,6 +35,7 @@ proc membprop(){
     
     forsec nodes{
         insert hh
+        insert extracellular
         Rm = 1000
         Ra = 100*((l+L)/l)/1e4
         cm = 2
@@ -67,7 +68,7 @@ for i= 0, nnode-2 {
 
 // set electrode stim *****
 
-AMP = 100
+AMP = -.1 //mA
 DUR = 1
 DEL = 1
 dt = 0.01
@@ -95,7 +96,7 @@ for i = 0, tstop/dt-1 {
 
 rho = 70 //Ohm cm //ex_resistivity
 
-XE = 500  // µm
+XE = 1410  // µm
 YE = 100  // µm
 ZE = 0    // µm
 
@@ -106,20 +107,23 @@ xtra_pot = new Vector(nnode-1)
 for k = 0, nnode-2 {
     dist = sqrt((pos_nx.get(k) - XE)^2 + (pos_ny.get(k) - YE)^2 + (pos_ny.get(k) - ZE)^2)
     dist_r.set(k,dist)
-    ve = (AMP * rho / 4 / PI)*(1/dist)*0.01
+    ve = (AMP * rho / 4 / PI)*(1/dist)*10^4
     xtra_pot.set(k,ve)
 }
 
 // end set electrode pos ******
 
-objref f
+for j = 0, nnode-2 {
+    access node[j]
+    node[j].e_extracellular(0.5) = xtra_pot.get(j)
+    print e_extracellular
+}
 
-f = new File()
-f.wopen("test_file.txt")
-xtra_pot.vwrite(f)
-f.close
-
-tstop = 10
+objref vec, g2
+g2 = new Graph()
+g2.size(0, 2680, -70,10)
+vec = xtra_pot
+vec.plot(g2, pos_nx, 3,2)
 
 objref p, vnodes
 p = new Graph()
@@ -135,9 +139,9 @@ vnodes.plot(p,dt,3,2)
 
 objectvar rvp, g
 
-rvp = new RangeVarPlot("xtra_pot_cont")
-node[20] rvp.begin(0)
-node[0] rvp.end(1)
+rvp = new RangeVarPlot("v")
+node[0] rvp.begin(0)
+node[20] rvp.end(1)
 g = new Graph()
 g.addobject(rvp)
 g.size(rvp.left(), rvp.right(),-90,50)

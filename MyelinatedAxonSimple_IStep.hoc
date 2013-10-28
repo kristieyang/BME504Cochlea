@@ -172,22 +172,6 @@ vnode.record(&node[node_num].v(.5))
 run()
 vnode.plot(p2,dt,3,2)
 
-objref spaceOverTime, vnode, col_data
-spaceOverTime = new Graph()
-spaceOverTime.size(0,tstop,-90,100)
-//p.label(0.3,0,"Time (ms)")
-//p.label(0,0.5,"Current (mA/cm2)")
-for i=0, nnode-2 {
-    
-   
-    
-    col_data = xtra_pot_at_node.getcol(i)
-    col_data.plot(spaceOverTime,dt,3,2)
-}
-
-
-
-
 
 objectvar rvp, g
 

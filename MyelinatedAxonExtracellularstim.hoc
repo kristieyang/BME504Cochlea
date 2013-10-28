@@ -21,7 +21,7 @@ proc buildaxon() {local k
         connect node[k+1](0),internode[k](0)
         }
         forsec internodes {nseg = 10}
-        
+}
 /*internode[1{
     nseg = 1
     Ra = 100 //I arbitrarily picked this value...change later

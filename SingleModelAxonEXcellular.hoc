@@ -41,7 +41,9 @@ proc membprop(){
             xraxial[0]=1e20
             xraxial[1]=1e20
             e_extracellular=0
+            insert xtra
         }
+        define_shape()
     }
 
     
@@ -62,6 +64,7 @@ proc membprop(){
             xraxial[1]=1e20
             e_extracellular=0
         }
+        define_shape()
     }
 
 }
@@ -74,11 +77,11 @@ proc make() {
 
 make(21) //create 21 nodes and 20 internodes
 
-forall insert xtra
+
 
 DEL = 1  // ms
-DUR = 10
-AMP = 1000  // mA
+DUR = 10000
+AMP = 1000000 // mA
 
 objref stim_amp, stim_time
 stim_amp = new Vector()
@@ -147,7 +150,7 @@ objref xint, yint, zint, range, xr
 
 proc grindaway() { local ii, nn, kk, xr
 	forall {
-        //if (ismembrane("xtra")) {
+        if (ismembrane("xtra")) {
             // get the data for the section
             nn = n3d()
             xx = new Vector(nn)
@@ -192,16 +195,13 @@ proc grindaway() { local ii, nn, kk, xr
             //		for ii = 0, nseg+1 {
             // don't bother computing coords of the 0 and 1 ends
             // also avoid writing coords of the 1 end into the last internal node's coords
-            print "nseg"
-            print nseg
+
             for ii = 1, nseg {
                 xr = range.x[ii]
-                print "xr:"
-                print xr
-                //x_xtra(xr) = xint.x[ii]
-                //y_xtra(xr) = yint.x[ii]
-                //z_xtra(xr) = zint.x[ii]
-          //  }
+                x_xtra(xr) = xint.x[ii]
+                y_xtra(xr) = yint.x[ii]
+                z_xtra(xr) = zint.x[ii]
+            }
         }
 	}
 }
@@ -215,6 +215,7 @@ proc setpointers() { local done
     forall {
         if (ismembrane("xtra")) {
             for (x, 0) {
+                setpointer im_xtra(x), i_membrane(x)
                 setpointer ex_xtra(x), e_extracellular(x)
             }
         }
@@ -223,7 +224,7 @@ proc setpointers() { local done
 
 print "After any change to cell geometry or nseg, be sure to invoke setpointers()"
 
-//setpointers()
+setpointers()
 
 // set pointers ***********
 
@@ -231,7 +232,7 @@ print "After any change to cell geometry or nseg, be sure to invoke setpointers(
 rho = 70 //Ohm cm
 
 XE = 50  // um
-YE = 1
+YE = .01
 ZE = 0
 
 print "before loop"
@@ -241,13 +242,14 @@ proc setrx() {
         if (ismembrane("xtra")) {
             // avoid nodes at 0 and 1 ends, so as not to override values at internal nodes
             for (x,0) {
-                print x
-                print x_xtra(0)
+                print "x_xtra(x)"
+                print x_xtra(x)
                 r = sqrt((x_xtra(x) - xe)^2 + (y_xtra(x) - ye)^2 + (z_xtra(x) - ze)^2)
                 //        r = sqrt((x_xtra(x) - $1)^2 + (y_xtra(x) - $2)^2 + (z_xtra(x) - $3)^2)
                 // 0.01 converts rho's cm to um and ohm to megohm
                 rx_xtra(x) = (rho / 4 / PI)*(1/r)*0.01
-                print "here"
+                print "rx_xtra(x)"
+                print rx_xtra(x)
             }
         }
     }
@@ -263,11 +265,9 @@ proc setrx() {
 //g2 = new Graph()
 //g2.addobject(rvp2,3,2)
 //g2.size(rvp2.left(), rvp2.right(),-200,200)
-    
-    
-load_file("rigc.ses")
-load_file("rigxc.ses")
 
+
+load_file("rigxc.ses")
 load_file("field.hoc")    
 
 create sElec  // bogus section to show extracell stim/rec electrode location
@@ -306,8 +306,6 @@ xvalue("z", "ZE", 1, "setelec(XE,YE,ZE)", 0, 1)
 xpanel(855,204)
 
 
-
-
 //Create an intracellular stimulus
 //objectvar stim
 //node[10] stim = new IClamp(0.5)
@@ -325,6 +323,7 @@ p.size(0,tstop,-90,100)
 vnodes = new Vector()
 vinternodes = new Vector()
 
+access internode[10]
 vinternodes.record(&internode[10].v(.5))
 vnodes.record(&node[10].v(.5))
 
@@ -333,7 +332,7 @@ vnodes.record(&node[10].v(.5))
 vnodes.plot(p,dt,3,2)
 vinternodes.plot(p,dt,2,1)
 
-objectvar rvp, g
+objectvar rvp, g, rvp2, g2
 
 rvp = new RangeVarPlot("v")
 node[1] rvp.begin(0)
@@ -341,3 +340,5 @@ node[20] rvp.end(1)
 g = new Graph()
 g.addobject(rvp)
 g.size(rvp.left(), rvp.right(),-90,50)
+
+

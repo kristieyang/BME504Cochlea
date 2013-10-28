@@ -1,0 +1,63 @@
+objref tvec, pvec, veclist
+objref extern_field
+extern_field = new Matrix(3,6) // values define by Finite element model
+extern_field.x[0][0] = -91.7
+extern_field.x[1][0] = -91.7
+extern_field.x[2][0] = -91.7
+
+extern_field.x[0][1] = -91.6
+extern_field.x[1][1] = -91.6
+extern_field.x[2][1] = -91.5
+
+extern_field.x[0][2] = -91.5
+extern_field.x[1][2] = -91.5
+extern_field.x[2][2] = -91.5
+
+extern_field.x[0][3] = -91.5
+extern_field.x[1][3] = -91.5
+extern_field.x[2][3] = -91.4
+
+extern_field.x[0][4] = -91.4
+extern_field.x[1][4] = -91.4
+extern_field.x[2][4] = -91.4
+
+extern_field.x[0][5] = -91.4
+extern_field.x[1][5] = -91.3
+extern_field.x[1][5] = -91.3
+
+objref sl
+sl = new SectionList()
+proc setstim() { localobj tmpvec
+for sec_i = 0, 5 {
+  veclist = new List()
+  forsec sl(sec_i){
+  i = 0
+  for (x, 0) {  // iterate over internal nodes only, here 3
+      tmpvec = pvec.c
+     tmpvec.x[i] = extern_field.x[i][sec_i]
+     i = i+1
+      tmpvec.play(&e_extracellular(x), tvec)
+      veclist.append(tmpvec)
+    }
+   }
+  }
+}
+
+proc stim_vec() {
+// tvec will hold the stimulus sample times
+// pvec will be a 1 ms pulse of with amplitude PMAX
+NUMPTS = 5
+tvec = new Vector(NUMPTS)
+pvec = new Vector(NUMPTS)
+PMAX = $1 
+dur = $2
+del = $3
+{ tvec.x[0]=0    pvec.x[0]=0 }  // field is 0 for 1 ms 
+{ tvec.x[1]=del   pvec.x[1]=0 }
+{ tvec.x[2]=del    pvec.x[2]=1 }  // jumps to some value
+{ tvec.x[3]=del+dur  pvec.x[3]=1 }  //   for 1 ms
+{ tvec.x[4]=del+dur  pvec.x[4]=0 }  // falls back to 0 ever after
+setstim()
+}
+
+

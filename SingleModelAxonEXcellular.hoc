@@ -74,6 +74,8 @@ proc make() {
 
 make(21) //create 21 nodes and 20 internodes
 
+forall insert xtra
+
 DEL = 1  // ms
 DUR = 1
 AMP = 10000  // mA
@@ -103,6 +105,22 @@ proc stim_waveform() {
     stim_time.x[5]=$1+$2+1
 }
 
+ATTACHED__ = 0
+
+proc attach_stim() {
+    // since is_xtra is GLOBAL, we only need to specify Vector.play()
+    // for one instance of xtra, i.e. at just one internal node
+    // of only one section that contains xtra
+    forall {  // check each section to find one that has xtra
+        if (ATTACHED__ == 0) {  // don't bother if stim is already attached to something
+            if (ismembrane("xtra")) {
+                stim_amp.play(&is_xtra, stim_time, 1) // "interpolated" play
+                ATTACHED__ = 1
+            }
+        }
+    }
+}
+
 proc setstim() {
     del = $1
     dur = $2
@@ -118,16 +136,18 @@ xvalue("dur (ms)", "DUR", 1, "setstim(DEL,DUR,AMP)", 0, 1)
 xvalue("amp (mA)", "AMP", 1, "setstim(DEL,DUR,AMP)", 0, 1)
 xpanel(73,497)
 
+
+
 // interpxyz.hoc **************
 
 // original data, irregularly spaced
 objref xx, yy, zz, length
 // interpolated data, spaced at regular intervals
-objref xint, yint, zint, range, xr, x_xtra, y_xtra
+objref xint, yint, zint, range, xr
 
 proc grindaway() { local ii, nn, kk, xr
 	forall {
-        if (ismembrane("xtra")) {
+        //if (ismembrane("xtra")) {
             // get the data for the section
             nn = n3d()
             xx = new Vector(nn)
@@ -181,13 +201,31 @@ proc grindaway() { local ii, nn, kk, xr
                 //x_xtra(xr) = xint.x[ii]
                 //y_xtra(xr) = yint.x[ii]
                 //z_xtra(xr) = zint.x[ii]
-            }
+          //  }
         }
 	}
 }
 
-
 // interpxyz.hoc **************
+
+// setpointers **********
+
+proc setpointers() { local done
+    grindaway()  // in interpxyz.hoc, determines interpolated locations of nodes
+    forall {
+        if (ismembrane("xtra")) {
+            for (x, 0) {
+                setpointer ex_xtra(x), e_extracellular(x)
+            }
+        }
+    }
+}
+
+print "After any change to cell geometry or nseg, be sure to invoke setpointers()"
+
+//setpointers()
+
+// set pointers ***********
 
 //ex_resistivity
 rho = 70 //Ohm cm
@@ -196,13 +234,11 @@ XE = 50  // um
 YE = 1
 ZE = 0
 
-objref rx_xtra
-rx_xtra = new Vector()
 print "before loop"
 
 proc setrx() {
     forall {
-        //if (ismembrane("xtra")) {
+        if (ismembrane("xtra")) {
             // avoid nodes at 0 and 1 ends, so as not to override values at internal nodes
             for (x,0) {
                 print x
@@ -210,24 +246,29 @@ proc setrx() {
                 r = sqrt((x_xtra(x) - xe)^2 + (y_xtra(x) - ye)^2 + (z_xtra(x) - ze)^2)
                 //        r = sqrt((x_xtra(x) - $1)^2 + (y_xtra(x) - $2)^2 + (z_xtra(x) - $3)^2)
                 // 0.01 converts rho's cm to um and ohm to megohm
-                rx_xtra.x[x] = (rho / 4 / PI)*(1/r)*0.01
+                rx_xtra(x) = (rho / 4 / PI)*(1/r)*0.01
                 print "here"
             }
-        //}
+        }
     }
 }
 
 
 
-objref rvp2, g2
+//objref rvp2, g2
 
-rvp2 = new RangeVarPlot("rx_xtra")
-node[1] rvp2.begin(0)
-node[20] rvp2.end(1)
-g2 = new Graph()
-g2.addobject(rvp2,3,2)
-g2.size(rvp2.left(), rvp2.right(),-200,200)
+//rvp2 = new RangeVarPlot("rx_xtra")
+//node[1] rvp2.begin(0)
+//node[20] rvp2.end(1)
+//g2 = new Graph()
+//g2.addobject(rvp2,3,2)
+//g2.size(rvp2.left(), rvp2.right(),-200,200)
+    
+    
+load_file("rigc.ses")
+load_file("rigxc.ses")
 
+load_file("field.hoc")    
 
 create sElec  // bogus section to show extracell stim/rec electrode location
 objref pElec  // bogus PointProcess just to show stim location
@@ -235,6 +276,7 @@ objref gElec  // will be a Shape that shows extracellular electrode location
 
 gElec = new Shape(0)  // create it but don't map it to the screen yet
 
+    
 proc drawelec() {
 	sElec {
 		// make it 1 um long
@@ -287,7 +329,7 @@ vinternodes.record(&internode[10].v(.5))
 vnodes.record(&node[10].v(.5))
 
 
-run()
+
 vnodes.plot(p,dt,3,2)
 vinternodes.plot(p,dt,2,1)
 
@@ -299,6 +341,3 @@ node[20] rvp.end(1)
 g = new Graph()
 g.addobject(rvp)
 g.size(rvp.left(), rvp.right(),-90,50)
-
-print rvp.left()
-print rvp.right()

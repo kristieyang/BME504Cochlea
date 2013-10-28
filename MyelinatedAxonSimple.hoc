@@ -1,0 +1,102 @@
+//Myelinated Axon
+//help from http://www.neuron.yale.edu/phpBB/viewtopic.php?f=15&t=2653&p=10618&hilit=myelinated+axon#p10618
+
+load_file("nrngui.hoc")
+load_proc("nrnmainmenu")
+
+create node[1], internode[1]
+objref nodes, internodes
+
+vinit = -65 //mV
+// buildaxon creates an axon that has 21 compartments, 20 nodes
+
+proc buildaxon() {local k
+    nnode = $1
+    create node[nnode], internode[nnode-1]
+    nodes = new SectionList()
+    internodes = new SectionList()
+    forsec "node" nodes.append
+    forsec "internodes" internodes.append
+    access node[0]
+    for k = 0, nnode-2{
+        connect internode[k](0),node[k](1)
+        connect node[k+1](0),internode[k](0)
+    }
+    
+    forsec internodes {nseg = 1}
+}
+
+proc physprop(){
+    forsec nodes{
+        diam = 0.7*1.4//um
+        l = 1//µm
+    }
+    
+    forsec internodes{
+        diam = 1.4 //um
+        L = 10 //um
+    }
+}
+
+proc membprop(){
+    
+    forsec nodes{
+        Rm = 1000
+        Ra = 100
+        cm = 1
+        insert hh
+    }
+    
+    forsec internodes{
+        Rm = 292600
+        Ra = 100
+        cm = 0.005
+        insert pas
+        e_pas = -65
+        g_pas = 1/1000
+    }
+}
+
+
+proc make() {
+    buildaxon($1)
+    physprop($2)
+    membprop()
+}
+
+make(21,10) //create 21 nodes and 20 internodes
+
+
+//Create an intracellular stimulus
+objectvar stim
+internode[10] stim = new IClamp(0.5)
+stim.del = 1   //Apply stimulus immediately
+stim.dur = .2    //Stimulus duration = 200 us
+stim.amp = 1  //2*Vth to evoke AP (units of nA)
+
+tstop = 2
+
+objref p, vnodes, vinternodes
+p = new Graph()
+p.size(0,tstop,-90,50)
+//p.label(0.3,0,"Time (ms)")
+//p.label(0,0.5,"Current (mA/cm2)")
+vnodes = new Vector()
+vinternodes = new Vector()
+
+vnodes.record(&node[10].v(.5))
+vinternodes.record(&internode[10].v(.5))
+
+run()
+vnodes.plot(p,dt,3,2)
+vinternodes.plot(p,dt,2,1)
+
+objectvar rvp, g
+
+rvp = new RangeVarPlot("v")
+node[1] rvp.begin(0)
+node[20] rvp.end(1)
+g = new Graph()
+g.addobject(rvp)
+g.size(rvp.left(), rvp.right(),-90,50)
+

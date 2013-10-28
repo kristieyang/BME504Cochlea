@@ -80,8 +80,8 @@ make(21) //create 21 nodes and 20 internodes
 
 
 DEL = 1  // ms
-DUR = 10000
-AMP = 1000000 // mA
+DUR = 100
+AMP = 100 // mA
 
 objref stim_amp, stim_time
 stim_amp = new Vector()
@@ -231,8 +231,8 @@ setpointers()
 //ex_resistivity
 rho = 70 //Ohm cm
 
-XE = 50  // um
-YE = .01
+XE = 500  // um
+YE = 100
 ZE = 0
 
 print "before loop"
@@ -242,33 +242,35 @@ proc setrx() {
         if (ismembrane("xtra")) {
             // avoid nodes at 0 and 1 ends, so as not to override values at internal nodes
             for (x,0) {
-                print "x_xtra(x)"
-                print x_xtra(x)
+
                 r = sqrt((x_xtra(x) - xe)^2 + (y_xtra(x) - ye)^2 + (z_xtra(x) - ze)^2)
                 //        r = sqrt((x_xtra(x) - $1)^2 + (y_xtra(x) - $2)^2 + (z_xtra(x) - $3)^2)
                 // 0.01 converts rho's cm to um and ohm to megohm
-                rx_xtra(x) = (rho / 4 / PI)*(1/r)*0.01
-                print "rx_xtra(x)"
-                print rx_xtra(x)
+                rx_xtra(x) = (AMP * rho / 4 / PI)*(1/r)*0.01
+
             }
         }
     }
 }
 
+for i=0, 21 {
+    access node[i]
+    e_extracellular = rx_xtra(i)
+}
 
 
-//objref rvp2, g2
+objref rvp2, g2
 
-//rvp2 = new RangeVarPlot("rx_xtra")
-//node[1] rvp2.begin(0)
-//node[20] rvp2.end(1)
-//g2 = new Graph()
-//g2.addobject(rvp2,3,2)
-//g2.size(rvp2.left(), rvp2.right(),-200,200)
+rvp2 = new RangeVarPlot("rx_xtra")
+node[1] rvp2.begin(0)
+node[20] rvp2.end(1)
+g2 = new Graph()
+g2.addobject(rvp2,3,2)
+g2.size(rvp2.left(), rvp2.right(),0,.1)
 
 
 load_file("rigxc.ses")
-load_file("field.hoc")    
+load_file("field.hoc")
 
 create sElec  // bogus section to show extracell stim/rec electrode location
 objref pElec  // bogus PointProcess just to show stim location
@@ -313,7 +315,7 @@ xpanel(855,204)
 //stim.dur = .2    //Stimulus duration = 200 us
 //stim.amp = 10  //2*Vth to evoke AP (units of nA)
 
-tstop = 10
+tstop = 1
 
 objref p, vnodes, vinternodes
 p = new Graph()
@@ -332,7 +334,7 @@ vnodes.record(&node[10].v(.5))
 vnodes.plot(p,dt,3,2)
 vinternodes.plot(p,dt,2,1)
 
-objectvar rvp, g, rvp2, g2
+objectvar rvp, g
 
 rvp = new RangeVarPlot("v")
 node[1] rvp.begin(0)
@@ -340,5 +342,7 @@ node[20] rvp.end(1)
 g = new Graph()
 g.addobject(rvp)
 g.size(rvp.left(), rvp.right(),-90,50)
+
+
 
 

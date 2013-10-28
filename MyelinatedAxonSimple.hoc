@@ -4,98 +4,79 @@
 load_file("nrngui.hoc")
 load_proc("nrnmainmenu")
 
-create node[1], internode[1]
-objref nodes, internodes
+create node[1]
+objref nodes
 
 vinit = -65 //mV
 // buildaxon creates an axon that has 21 compartments, 20 nodes
 
 proc buildaxon() {local k
     nnode = $1
-    create node[nnode], internode[nnode-1]
+    create node[nnode]
     nodes = new SectionList()
-    internodes = new SectionList()
     forsec "node" nodes.append
-    forsec "internodes" internodes.append
     access node[0]
     for k = 0, nnode-2{
-        connect internode[k](0),node[k](1)
-        connect node[k+1](0),internode[k](0)
+        connect node[k](1),node[k+1](0)
     }
-    
-    forsec internodes {nseg = 1}
 }
 
 proc physprop(){
     forsec nodes{
         diam = 0.7*1.4//um
         l = 1//µm
-    }
-    
-    forsec internodes{
-        diam = 1.4 //um
-        L = 10 //um
+        L = 100*1.4 //µm
+        nseg = 15
     }
 }
 
 proc membprop(){
     
     forsec nodes{
-        Rm = 1000
-        Ra = 100
-        cm = 1
         insert hh
+        Rm = 1000
+        Ra = 100*((l+L)/l)/1e4
+        cm = 2
     }
     
-    forsec internodes{
-        Rm = 292600
-        Ra = 100
-        cm = 0.005
-        insert pas
-        e_pas = -65
-        g_pas = 1/1000
-    }
 }
 
 
 proc make() {
     buildaxon($1)
-    physprop($2)
+    physprop()
     membprop()
 }
 
-make(21,10) //create 21 nodes and 20 internodes
+make(21) //create 21 nodes and 20 internodes
 
 
 //Create an intracellular stimulus
 objectvar stim
-internode[10] stim = new IClamp(0.5)
+node[10] stim = new IClamp(0.5)
 stim.del = 1   //Apply stimulus immediately
 stim.dur = .2    //Stimulus duration = 200 us
-stim.amp = 1  //2*Vth to evoke AP (units of nA)
+stim.amp = 10  //2*Vth to evoke AP (units of nA)
 
-tstop = 2
+tstop = 10
 
-objref p, vnodes, vinternodes
+objref p, vnodes
 p = new Graph()
-p.size(0,tstop,-90,50)
+p.size(0,tstop,-90,100)
 //p.label(0.3,0,"Time (ms)")
 //p.label(0,0.5,"Current (mA/cm2)")
 vnodes = new Vector()
-vinternodes = new Vector()
 
 vnodes.record(&node[10].v(.5))
-vinternodes.record(&internode[10].v(.5))
 
 run()
 vnodes.plot(p,dt,3,2)
-vinternodes.plot(p,dt,2,1)
 
 objectvar rvp, g
 
 rvp = new RangeVarPlot("v")
-node[1] rvp.begin(0)
-node[20] rvp.end(1)
+node[20] rvp.begin(0)
+node[0] rvp.end(1)
 g = new Graph()
 g.addobject(rvp)
 g.size(rvp.left(), rvp.right(),-90,50)

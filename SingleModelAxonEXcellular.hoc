@@ -77,8 +77,8 @@ make(21) //create 21 nodes and 20 internodes
 forall insert xtra
 
 DEL = 1  // ms
-DUR = 1
-AMP = 10000  // mA
+DUR = 10
+AMP = 1000  // mA
 
 objref stim_amp, stim_time
 stim_amp = new Vector()
@@ -315,7 +315,7 @@ xpanel(855,204)
 //stim.dur = .2    //Stimulus duration = 200 us
 //stim.amp = 10  //2*Vth to evoke AP (units of nA)
 
-tstop = 2
+tstop = 10
 
 objref p, vnodes, vinternodes
 p = new Graph()

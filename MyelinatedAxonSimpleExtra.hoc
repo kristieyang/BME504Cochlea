@@ -1,0 +1,144 @@
+//Myelinated Axon
+//help from http://www.neuron.yale.edu/phpBB/viewtopic.php?f=15&t=2653&p=10618&hilit=myelinated+axon#p10618
+
+load_file("nrngui.hoc")
+load_proc("nrnmainmenu")
+
+create node[1]
+objref nodes
+
+vinit = -65 //mV
+// buildaxon creates an axon that has 21 compartments, 20 nodes
+
+proc buildaxon() {local k
+    nnode = $1
+    create node[nnode]
+    nodes = new SectionList()
+    forsec "node" nodes.append
+    access node[0]
+    for k = 0, nnode-2{
+        connect node[k](1),node[k+1](0)
+    }
+}
+
+proc physprop(){
+    forsec nodes{
+        diam = 0.7*1.4//um
+        l = 1//µm
+        L = 100*1.4 //µm
+        nseg = 15
+        define_shape()
+    }
+}
+
+proc membprop(){
+    
+    forsec nodes{
+        insert hh
+        Rm = 1000
+        Ra = 100*((l+L)/l)/1e4
+        cm = 2
+    }
+    
+}
+
+
+proc make() {
+    buildaxon($1)
+    physprop()
+    membprop()
+}
+
+make(21) //create 21 nodes and 20 internodes
+
+
+
+objref pos_nx, pos_ny, pos_nz
+pos_nx = new Vector(nnode-1)
+pos_ny = new Vector(nnode-1)
+pos_nz = new Vector(nnode-1)
+
+for i= 0, nnode-2 {
+    pos_nx.set(i, l*(i+1)+i*L)
+    pos_ny.set(i, 0)
+    pos_nz.set(i, 0)
+}
+
+
+// set electrode stim *****
+
+AMP = 100
+DUR = 1
+DEL = 1
+dt = 0.01
+tstop = 10
+
+objref Istep
+
+Istep = new Vector(tstop/dt)
+
+for i = 0, tstop/dt-1 {
+        
+    if (i <= (DEL+DUR)/dt && i >= DEL/dt){
+        Istep.set(i,AMP)
+    }else {
+        Istep.set(i,0)
+    }
+    
+    i = i+1
+}
+
+// end set electrode stim *****
+
+
+// set electrode pos *******
+
+rho = 70 //Ohm cm //ex_resistivity
+
+XE = 500  // µm
+YE = 100  // µm
+ZE = 0    // µm
+
+objref dist_r, xtra_pot
+dist_r = new Vector(nnode-1)
+xtra_pot = new Vector(nnode-1)
+
+for k = 0, nnode-2 {
+    dist = sqrt((pos_nx.get(k) - XE)^2 + (pos_ny.get(k) - YE)^2 + (pos_ny.get(k) - ZE)^2)
+    dist_r.set(k,dist)
+    ve = (AMP * rho / 4 / PI)*(1/dist)*0.01
+    xtra_pot.set(k,ve)
+}
+
+// end set electrode pos ******
+
+objref f
+
+f = new File()
+f.wopen("test_file.txt")
+xtra_pot.vwrite(f)
+f.close
+
+tstop = 10
+
+objref p, vnodes
+p = new Graph()
+p.size(0,tstop,-90,100)
+//p.label(0.3,0,"Time (ms)")
+//p.label(0,0.5,"Current (mA/cm2)")
+vnodes = new Vector()
+
+vnodes.record(&node[10].v(.5))
+
+run()
+vnodes.plot(p,dt,3,2)
+
+objectvar rvp, g
+
+rvp = new RangeVarPlot("xtra_pot_cont")
+node[20] rvp.begin(0)
+node[0] rvp.end(1)
+g = new Graph()
+g.addobject(rvp)
+g.size(rvp.left(), rvp.right(),-90,50)
+

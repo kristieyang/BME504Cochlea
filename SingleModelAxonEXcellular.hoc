@@ -72,53 +72,7 @@ proc make() {
     membprop()
 }
 
-make(21) //create 21 nodes and 20 internodes
-
-DEL = 1  // ms
-DUR = 1
-AMP = 10000  // mA
-
-objref stim_amp, stim_time
-stim_amp = new Vector()
-stim_time = new Vector()
-
-proc stim_waveform() {
-    // this uses interpolated play
-    // index    0  1    2    3        4        5
-    // stim vec 0, 0,   1,   1,       0        0
-    // time vec 0, DEL, DEL, DEL+DUR, DEL+DUR, DEL+DUR+1
-    //  really  0, $1,  $1,  $1+$2,   $1+$2,   $1+$2+1
-    // first the stim vector
-    stim_amp.resize(6)
-    stim_amp.fill(0)
-    stim_amp.x[2]=1
-    stim_amp.x[3]=1
-    stim_amp.mul($3)
-    // now the time vector
-    stim_time.resize(6)
-    stim_time.x[1]=$1
-    stim_time.x[2]=$1
-    stim_time.x[3]=$1+$2
-    stim_time.x[4]=$1+$2
-    stim_time.x[5]=$1+$2+1
-}
-
-proc setstim() {
-    del = $1
-    dur = $2
-    amp = $3
-    stim_waveform(del, dur, amp)
-}
-
-
-setstim(DEL, DUR, AMP)
-xpanel("Extracellular Stimulus Current", 0)
-xvalue("del (ms)", "DEL", 1, "setstim(DEL,DUR,AMP)", 0, 1)
-xvalue("dur (ms)", "DUR", 1, "setstim(DEL,DUR,AMP)", 0, 1)
-xvalue("amp (mA)", "AMP", 1, "setstim(DEL,DUR,AMP)", 0, 1)
-xpanel(73,497)
-
-// interpxyz.hoc **************
+make(21) //create 21 nodes and 20 internodes//interpxyz.hoc **************
 
 // original data, irregularly spaced
 objref xx, yy, zz, length
@@ -178,9 +132,9 @@ proc grindaway() { local ii, nn, kk, xr
                 xr = range.x[ii]
                 print "xr:"
                 print xr
-                //x_xtra(xr) = xint.x[ii]
-                //y_xtra(xr) = yint.x[ii]
-                //z_xtra(xr) = zint.x[ii]
+                x_xtra(xr) = xint.x[ii]
+                y_xtra(xr) = yint.x[ii]
+                z_xtra(xr) = zint.x[ii]
             }
         }
 	}
@@ -188,6 +142,50 @@ proc grindaway() { local ii, nn, kk, xr
 
 
 // interpxyz.hoc **************
+
+DEL = 1  // ms
+DUR = 1
+AMP = 10000  // mA
+
+objref stim_amp, stim_time
+stim_amp = new Vector()
+stim_time = new Vector()
+
+proc stim_waveform() {
+    // this uses interpolated play
+    // index    0  1    2    3        4        5
+    // stim vec 0, 0,   1,   1,       0        0
+    // time vec 0, DEL, DEL, DEL+DUR, DEL+DUR, DEL+DUR+1
+    //  really  0, $1,  $1,  $1+$2,   $1+$2,   $1+$2+1
+    // first the stim vector
+    stim_amp.resize(6)
+    stim_amp.fill(0)
+    stim_amp.x[2]=1
+    stim_amp.x[3]=1
+    stim_amp.mul($3)
+    // now the time vector
+    stim_time.resize(6)
+    stim_time.x[1]=$1
+    stim_time.x[2]=$1
+    stim_time.x[3]=$1+$2
+    stim_time.x[4]=$1+$2
+    stim_time.x[5]=$1+$2+1
+}
+
+proc setstim() {
+    del = $1
+    dur = $2
+    amp = $3
+    stim_waveform(del, dur, amp)
+}
+
+
+setstim(DEL, DUR, AMP)
+xpanel("Extracellular Stimulus Current", 0)
+xvalue("del (ms)", "DEL", 1, "setstim(DEL,DUR,AMP)", 0, 1)
+xvalue("dur (ms)", "DUR", 1, "setstim(DEL,DUR,AMP)", 0, 1)
+xvalue("amp (mA)", "AMP", 1, "setstim(DEL,DUR,AMP)", 0, 1)
+xpanel(73,497)
 
 //ex_resistivity
 rho = 70 //Ohm cm

@@ -1,0 +1,18 @@
+nnodes = 21
+
+% This is hardcoded for 50% myelination
+
+var_rand = (rand(1,nnodes-1));
+rand_vec = zeros(size(var_rand));
+MyMatrix = zeros(size(var_rand));
+for i = 1:nnodes-1
+    rand_vec(i) = round(var_rand(i));
+    if rand_vec(i) == 0
+        MyMatrix(i) = 0;
+    else
+        MyMatrix(i) = 1;
+    end
+end
+
+%%csvwrite('MyMatrix.dat',MyMatrix)
+%%type MyMatrix.dat

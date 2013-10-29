@@ -1,6 +1,7 @@
-//Myelinated Axon
-//help from http://www.neuron.yale.edu/phpBB/viewtopic.php?f=15&t=2653&p=10618&hilit=myelinated+axon#p10618
-
+//Myelinated Axon, Perfect Insulator, With Extra Stim and Additional Plots
+//based on Modeling extracellular stimulation and recording with NEURON
+//by Ted
+//http://www.neuron.yale.edu/ftp/ted/neuron/extracellular_stim_and_rec.zip
 load_file("nrngui.hoc")
 load_proc("nrnmainmenu")
 
@@ -110,7 +111,9 @@ for k = 0, nnode-2 {
     dist_r.set(k,dist)
     ve = (AMP * rho / 4 / PI)*(1/dist)*10^4
     xtra_pot.set(k,ve)
+    print xtra_pot.get(k)
 }
+
 
 // end set electrode pos ******
 
@@ -175,7 +178,8 @@ print "size:"
 print vnodes.size()
 
 
-
+// show how node changes over time
+/*
 objref pos_vec
 pos_vec = new Vector(pos_nx.get(nnode-2))
 
@@ -220,6 +224,9 @@ f=new File()
 f.wopen("Vm_AtONENode_OverALLTime.txt")
 vspace_mat.fprint(f)
 f.close()
+*/
+// end show how node changes over time
+
 
 
 // write Vm matrix --> matlab
@@ -246,7 +253,7 @@ f.close()
 */
  
 // end write Vm matrix --> matlab
-/*
+
 objectvar rvp, g
 
 rvp = new RangeVarPlot("v")
@@ -255,4 +262,4 @@ node[20] rvp.end(1)
 g = new Graph()
 g.addobject(rvp)
 g.size(rvp.left(),rvp.right(),-90,50)
-*/
+

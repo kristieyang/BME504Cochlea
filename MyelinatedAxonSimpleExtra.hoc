@@ -1,5 +1,7 @@
-//Myelinated Axon
-//help from http://www.neuron.yale.edu/phpBB/viewtopic.php?f=15&t=2653&p=10618&hilit=myelinated+axon#p10618
+//Myelinated Axon, Perfect Insulator, With Extra Stim
+//based on Modeling extracellular stimulation and recording with NEURON
+//by Ted
+//http://www.neuron.yale.edu/ftp/ted/neuron/extracellular_stim_and_rec.zip
 
 load_file("nrngui.hoc")
 load_proc("nrnmainmenu")
@@ -85,8 +87,6 @@ for i = 0, tstop/dt-1 {
     }else {
         Istep.set(i,0)
     }
-    
-    i = i+1
 }
 
 // end set electrode stim *****
@@ -115,7 +115,7 @@ for k = 0, nnode-2 {
 
 for j = 0, nnode-2 {
     access node[j]
-    node[j].e_extracellular(0.5) = xtra_pot.get(j)
+    node[j].e_extracellular(1) = xtra_pot.get(j)
     print e_extracellular
 }
 
@@ -128,11 +128,9 @@ vec.plot(g2, pos_nx, 3,2)
 objref p, vnodes
 p = new Graph()
 p.size(0,tstop,-90,100)
-//p.label(0.3,0,"Time (ms)")
-//p.label(0,0.5,"Current (mA/cm2)")
 vnodes = new Vector()
 
-vnodes.record(&node[10].v(.5))
+vnodes.record(&node[11].v(1))
 
 run()
 vnodes.plot(p,dt,3,2)

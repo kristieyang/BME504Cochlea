@@ -29,6 +29,7 @@ proc physprop(){
         nseg = 15
         define_shape()
     }
+
 }
 
 proc membprop(){
@@ -37,7 +38,7 @@ proc membprop(){
         insert hh
         insert extracellular
         Rm = 1000
-        Ra = 100*((l+L)/l)/1e4
+        Ra = 10000*((l+L)/l)/1e4
         cm = 2
     }
     
@@ -69,24 +70,23 @@ for i= 0, nnode-2 {
 // set electrode stim *****
 
 AMP = -.1 //mA
-DUR = 1
+DUR = 3
 DEL = 1
-dt = 0.01
-tstop = 10
+dtime = 0.025
+ttot = 20
+tstop = ttot
 
 objref Istep
 
-Istep = new Vector(tstop/dt)
+Istep = new Vector(tstop/dtime)
 
-for i = 0, tstop/dt-1 {
+for i = 0, tstop/dtime-1 {
         
-    if (i <= (DEL+DUR)/dt && i >= DEL/dt){
+    if (i <= (DEL+DUR)/dtime && i >= DEL/dtime){
         Istep.set(i,AMP)
     }else {
         Istep.set(i,0)
     }
-    
-    i = i+1
 }
 
 // end set electrode stim *****
@@ -119,60 +119,127 @@ for k = 0, nnode-2 {
 objref dist_at_node
 dist_at_node = new Vector(nnode-1)
 objref xtra_pot_at_node
-xtra_pot_at_node = new Matrix(tstop/dt,nnode-1)
+xtra_pot_at_node = new Matrix(tstop/dtime,nnode-1)
 
 
 for j = 0, nnode-2 {
     node_num = j
     dist_at_node.set(j,sqrt((pos_nx.get(node_num) - XE)^2 + (pos_ny.get(node_num) - YE)^2 + (pos_ny.get(node_num) - ZE)^2))
     
-    for k = 0, tstop/dt-1 {
-        ve = (Istep.get(k) * rho / 4 / PI)*(1/dist_at_node.get(j))*10^4
+    for k = 0, tstop/dtime-1 {
+        ve = Istep.get(k) * (rho / 4 / PI)*(1/dist_at_node.get(j))*10^4
+        //ve = AMP * (rho / 4 / PI)*(1/dist_at_node.get(j))*10^4
         xtra_pot_at_node.setval(k,j,ve)
     }
 }
 
 objref f
 f=new File()
-f.wopen("test.txt")
+f.wopen("Ve_AtNode_OverTime.txt")
 xtra_pot_at_node.fprint(f)
 f.close()
 
 // end point in Space over time ****
 
+
+// plot extracellular pot at each node
+
 for j = 0, nnode-2 {
     access node[j]
-    node[j].e_extracellular(0.5) = xtra_pot.get(j)
-    print e_extracellular
+    time_point = (DUR+DEL)/dtime-1
+    //tstop = time_point
+    node[j].e_extracellular(0) = xtra_pot_at_node.getval(time_point,j)
 }
 
+
+
+// Matt's plot
 objref vec, g2
 g2 = new Graph()
 g2.size(0, 2680, -70,10)
 vec = xtra_pot
 vec.plot(g2, pos_nx, 3,2)
+// end Matt's plot
+
+// end plot extracellular pot at each node
+
 
 objref p, vnodes
 p = new Graph()
 p.size(0,tstop,-90,100)
-//p.label(0.3,0,"Time (ms)")
-//p.label(0,0.5,"Current (mA/cm2)")
 vnodes = new Vector()
-vnodes.record(&node[10].v(.5))
+vnodes.record(&node[11].v(0))
 run()
-vnodes.plot(p,dt,3,2)
-
-objref p2, vnode
-p2 = new Graph()
-p2.size(0,tstop,-90,100)
-//p.label(0.3,0,"Time (ms)")
-//p.label(0,0.5,"Current (mA/cm2)")
-vnode = new Vector()
-vnode.record(&node[node_num].v(.5))
-run()
-vnode.plot(p2,dt,3,2)
+vnodes.plot(p,dtime,3,2)
 
 
+
+objref pos_vec
+pos_vec = new Vector(pos_nx.get(nnode-2))
+
+for i=0, pos_vec.size()-1 {
+    pos_vec.set(i,i)
+}
+
+objref rvp2, vspace_mat, vspace_vec, g3
+vspace_mat = new Matrix(int(((DUR+10)/dtime)/25)+2,pos_vec.size()-1)
+vspace_vec = new Vector(pos_vec.size()-1)
+print "size"
+print int(((DUR+10)/dtime)/25)+1
+
+node_num = 11
+count = 1
+for(k = DEL/dtime; k < (DEL+DUR+10)/dtime-1; k = k + 25) {
+    access node[node_num]
+    print xtra_pot_at_node.getval(k,node_num)
+    node[node_num].e_extracellular(1) = xtra_pot_at_node.getval(k,node_num)
+    tstop = k*dtime
+    run()
+    rvp2 = new RangeVarPlot("v")
+    node[0] rvp2.begin(0)
+    node[20] rvp2.end(1)
+    
+    g3 = new Graph()
+    g3.addobject(rvp2)
+    g3.size(rvp2.left(),rvp2.right(),-90,50)
+
+    rvp2.to_vector(vspace_vec)
+    vspace_mat.setrow(count,vspace_vec)
+    count = count + 1
+}
+
+objref f
+f=new File()
+f.wopen("Vm_AtONENode_OverALLTime.txt")
+vspace_mat.fprint(f)
+f.close()
+
+
+// write Vm matrix --> matlab
+/*
+objref vnode, vnode_mat
+vnode_mat = new Matrix(tstop/dtime+1,nnode-1)
+vnode     = new Vector(tstop/dtime+1)
+
+for j = 0, nnode-2 {
+    for k = 0, tstop/dtime-1 {
+        access node[j]
+        node[j].e_extracellular(0.5) = xtra_pot_at_node.getval(k,j)
+    }
+    vnode.record(&node[j].v(.5))
+    run()
+    vnode_mat.setcol(j,vnode)
+}
+
+objref f
+f=new File()
+f.wopen("Vm_AtNode_OverTime.txt")
+vnode_mat.fprint(f)
+f.close()
+*/
+ 
+// end write Vm matrix --> matlab
+/*
 objectvar rvp, g
 
 rvp = new RangeVarPlot("v")
@@ -180,5 +247,5 @@ node[0] rvp.begin(0)
 node[20] rvp.end(1)
 g = new Graph()
 g.addobject(rvp)
-g.size(rvp.left(), rvp.right(),-90,50)
-
+g.size(rvp.left(),rvp.right(),-90,50)
+*/

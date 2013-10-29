@@ -9,8 +9,11 @@ for i=1:21
     str{i} = sprintf('%0.0f node',i)
     hold all
 end
-
+title('Extracellular Potential at Nodes Induced by Extracellular Electrode')
+ylabel('Extracellular Potential, mV')
+xlabel('Time, ms')
 legend(str)
+fixplot()
 
 
 
@@ -39,13 +42,16 @@ space = linspace(0,mat_size(2)-1,305);
 
 figure(3)
 clf
+suptitle('Spatial plots of Vm at node 11 (center node, under electrode)')
 for i=2:mat_size(1)
-    subplot(7,3,i-1)
+    subplot(5,2,i-1)
     plot(space,C(i,1:305),'LineWidth',2)
-    str{i} = sprintf('t = %0.0f',(i-2)*50);
+    fixplot()
+    str{i} = sprintf('t = %0.2f',((i-2)*50)*0.025);
     title(str{i})
+    xlabel('Length of Peripheral Process, µm')
+    ylabel('Vm, mV')
     axis([0 2680 min(min(C(2:end,:))) max(max(C(2:end,:)))])
     hold all
 end
-
 %legend(str)

@@ -143,14 +143,14 @@ f.close()
 
 
 // plot extracellular pot at each node
-
+/*
 for j = 0, nnode-2 {
     access node[j]
     time_point = (DUR+DEL)/dtime-1
     //tstop = time_point
     node[j].e_extracellular(0) = xtra_pot_at_node.getval(time_point,j)
 }
-
+*/
 
 
 // Matt's plot
@@ -168,9 +168,11 @@ objref p, vnodes
 p = new Graph()
 p.size(0,tstop,-90,100)
 vnodes = new Vector()
-vnodes.record(&node[11].v(0))
+vnodes.record(&node[11].v(1))
 run()
 vnodes.plot(p,dtime,3,2)
+print "size:"
+print vnodes.size()
 
 
 
@@ -181,23 +183,28 @@ for i=0, pos_vec.size()-1 {
     pos_vec.set(i,i)
 }
 
-objref rvp2, vspace_mat, vspace_vec, g3
-vspace_mat = new Matrix(int(((DUR+10)/dtime)/25)+2,pos_vec.size()-1)
+objref rvp2, vspace_mat, vspace_vec, g3,vnode2
+vspace_mat = new Matrix(int(((DUR+9)/dtime)/50)+2,pos_vec.size()-1)
 vspace_vec = new Vector(pos_vec.size()-1)
-print "size"
-print int(((DUR+10)/dtime)/25)+1
+vnode2 = new Vector()
 
 node_num = 11
-count = 1
-for(k = DEL/dtime; k < (DEL+DUR+10)/dtime-1; k = k + 25) {
-    access node[node_num]
-    print xtra_pot_at_node.getval(k,node_num)
-    node[node_num].e_extracellular(1) = xtra_pot_at_node.getval(k,node_num)
-    tstop = k*dtime
+access node[node_num]
+count = 0
+
+for(k = DEL/dtime; k < (DEL+DUR+9)/dtime-1; k = k + 50) {
+    tstop = (k)*dtime
+    
+    if (k < (DEL+DUR)/dtime){
+        for i=0,nnode-2 {
+            node[i].e_extracellular(1) = xtra_pot_at_node.getval(k,i)
+        }
+    }
     run()
+    
     rvp2 = new RangeVarPlot("v")
-    node[0] rvp2.begin(0)
-    node[20] rvp2.end(1)
+    node[0] rvp2.begin(1)
+    node[20] rvp2.end(0)
     
     g3 = new Graph()
     g3.addobject(rvp2)
@@ -224,7 +231,7 @@ vnode     = new Vector(tstop/dtime+1)
 for j = 0, nnode-2 {
     for k = 0, tstop/dtime-1 {
         access node[j]
-        node[j].e_extracellular(0.5) = xtra_pot_at_node.getval(k,j)
+        node[j].e_extracellular(1) = xtra_pot_at_node.getval(k,j)
     }
     vnode.record(&node[j].v(.5))
     run()

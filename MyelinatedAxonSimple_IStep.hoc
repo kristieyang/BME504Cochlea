@@ -45,7 +45,6 @@ proc membprop(){
     
 }
 
-
 proc make() {
     buildaxon($1)
     physprop()
@@ -54,212 +53,132 @@ proc make() {
 
 make(21) //create 21 nodes and 20 internodes
 
+// set electrode stim *****
+AMP = -0.1 //mA
+DUR = 3
+DEL = 1
+//dt = 0.025
+tstop = 20
+// end set electrode stim *****
 
+objref dummystim
+create dummy
+dummy dummystim = new IClamp(0.5)   //middle
+dummystim.del = DEL
+dummystim.dur = DUR
+dummystim.amp = AMP
+
+// set electrode pos *******
+rho = 70 //Ohm cm //ex_resistivity
+
+XE = 1410  // µm
+YE = 100  // µm
+ZE = 0    // µm//Define electrode position
 
 objref pos_nx, pos_ny, pos_nz
-pos_nx = new Vector(nnode-1)
-pos_ny = new Vector(nnode-1)
-pos_nz = new Vector(nnode-1)
+//pos_nx = new Vector(nnode-1)
+//pos_ny = new Vector(nnode-1)
+//pos_nz = new Vector(nnode-1)
 
-for i= 0, nnode-2 {
+pos_nx = new Vector(nnode,0)
+pos_ny = new Vector(nnode,0)
+pos_nz = new Vector(nnode,0)
+
+for i= 0, nnode-1 {
     pos_nx.set(i, l*(i+1)+i*L)
     pos_ny.set(i, 0)
     pos_nz.set(i, 0)
 }
 
-
-// set electrode stim *****
-
-AMP = -.1 //mA
-DUR = 3
-DEL = 1
-dtime = 0.025
-ttot = 20
-tstop = ttot
-
-objref Istep
-
-Istep = new Vector(tstop/dtime)
-
-for i = 0, tstop/dtime-1 {
-        
-    if (i <= (DEL+DUR)/dtime && i >= DEL/dtime){
-        Istep.set(i,AMP)
-    }else {
-        Istep.set(i,0)
-    }
-}
-
-// end set electrode stim *****
-
-
-// set electrode pos *******
-
-rho = 70 //Ohm cm //ex_resistivity
-
-XE = 1410  // µm
-YE = 100  // µm
-ZE = 0    // µm
-
-objref dist_r, xtra_pot
+objref dist_r, phi_e, phi_et, phi_ex
 dist_r = new Vector(nnode-1)
-xtra_pot = new Vector(nnode-1)
+phi_e = new Vector(nnode,0)
+phi_et = new Vector(tstop/dt,0)
+phi_ex = new Vector(nnode)
 
-// Point in time over Space
-for k = 0, nnode-2 {
-    dist = sqrt((pos_nx.get(k) - XE)^2 + (pos_ny.get(k) - YE)^2 + (pos_ny.get(k) - ZE)^2)
-    dist_r.set(k,dist)
-    ve = (AMP * rho / 4 / PI)*(1/dist)*10^4
-    xtra_pot.set(k,ve)
-    print xtra_pot.get(k)
+// extracellular potentials
+proc potential_field(){
+	for i=0, nnode-1{
+		r = sqrt((pos_nx.get[i] - XE)^2 + (pos_ny.get[i] - YE)^2 + (pos_nz.get[i] - ZE)^2)
+		phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4
+		node[i].e_extracellular(0.5) = phi_e.x[i]
+        if (t == 2/dt){
+            phi_ex.x[i] = phi_e.x[i]
+        }
+	}
+    phi_et.x[t/dt] = phi_e.x[10]
 }
 
+// time integrate with constant time step size
+proc stimulate(){
+	finitialize(vinit)
+	while (t<tstop) {
+        potential_field()
+        fadvance()
+	}
+}
 
-// end set electrode pos ******
+// RUN THE CODE
+//stimulate()
 
+ objref pos_vec, rvp2, vspace_mat, vspace_vec, g3, vnode2, f
 
-// Point in Space over time ****
-objref dist_at_node
-dist_at_node = new Vector(nnode-1)
-objref xtra_pot_at_node
-xtra_pot_at_node = new Matrix(tstop/dtime,nnode-1)
+proc spatialplots(){
+    // show how node changes over time
 
+     pos_vec = new Vector(pos_nx.get(nnode-1))
+     for i=0, pos_vec.size()-1 {
+     pos_vec.set(i,i)
+     }
 
-for j = 0, nnode-2 {
-    node_num = j
-    dist_at_node.set(j,sqrt((pos_nx.get(node_num) - XE)^2 + (pos_ny.get(node_num) - YE)^2 + (pos_ny.get(node_num) - ZE)^2))
+     vspace_mat = new Matrix(int(((DUR+9)/dt)/50)+2,pos_vec.size()-1)
+     vspace_vec = new Vector(pos_vec.size()-1)
+     vnode2 = new Vector()
+     node_num = 11
+     access node[node_num]
+     count = 0
+     for(k = DEL/dt; k < (DEL+DUR+9)/dt-1; k = k + 50) {
+     tstop = (k)*dt
+     
+     
+     rvp2 = new RangeVarPlot("v")
+     node[0] rvp2.begin(1)
+     node[20] rvp2.end(0)
+     
+     g3 = new Graph()
+     g3.addobject(rvp2)
+     g3.size(rvp2.left(),rvp2.right(),-90,50)
+     rvp2.to_vector(vspace_vec)
+     vspace_mat.setrow(count,vspace_vec)
+     count = count + 1
+     }
+
+     f=new File()
+     f.wopen("Vm_AtONENode_OverALLTime.txt")
+     vspace_mat.fprint(f)
+     f.close()
     
-    for k = 0, tstop/dtime-1 {
-        ve = Istep.get(k) * (rho / 4 / PI)*(1/dist_at_node.get(j))*10^4
-        //ve = AMP * (rho / 4 / PI)*(1/dist_at_node.get(j))*10^4
-        xtra_pot_at_node.setval(k,j,ve)
-    }
+    // end show how node changes over time
+    
 }
 
-objref f
-f=new File()
-f.wopen("Ve_AtNode_OverTime.txt")
-xtra_pot_at_node.fprint(f)
-f.close()
-
-// end point in Space over time ****
+spatialplots()
 
 
-// plot extracellular pot at each node
-/*
-for j = 0, nnode-2 {
-    access node[j]
-    time_point = (DUR+DEL)/dtime-1
-    //tstop = time_point
-    node[j].e_extracellular(0) = xtra_pot_at_node.getval(time_point,j)
-}
-*/
 
+//PLOTTING
 
-// Matt's plot
+// Extracellular potential vs. time at one node
+objref vec1, g1
+g1 = new Graph()
+g1.size(0,tstop,vinit,90)
+vec1 = phi_et
+vec1.plot(g1,dt,2,1)
+
+// Extracellular potential vs distance at one time point
 objref vec, g2
 g2 = new Graph()
 g2.size(0, 2680, -70,10)
-vec = xtra_pot
+vec = phi_ex
 vec.plot(g2, pos_nx, 3,2)
 // end Matt's plot
-
-// end plot extracellular pot at each node
-
-
-objref p, vnodes
-p = new Graph()
-p.size(0,tstop,-90,100)
-vnodes = new Vector()
-vnodes.record(&node[11].v(1))
-run()
-vnodes.plot(p,dtime,3,2)
-print "size:"
-print vnodes.size()
-
-
-// show how node changes over time
-/*
-objref pos_vec
-pos_vec = new Vector(pos_nx.get(nnode-2))
-
-for i=0, pos_vec.size()-1 {
-    pos_vec.set(i,i)
-}
-
-objref rvp2, vspace_mat, vspace_vec, g3,vnode2
-vspace_mat = new Matrix(int(((DUR+9)/dtime)/50)+2,pos_vec.size()-1)
-vspace_vec = new Vector(pos_vec.size()-1)
-vnode2 = new Vector()
-
-node_num = 11
-access node[node_num]
-count = 0
-
-for(k = DEL/dtime; k < (DEL+DUR+9)/dtime-1; k = k + 50) {
-    tstop = (k)*dtime
-    
-    if (k < (DEL+DUR)/dtime){
-        for i=0,nnode-2 {
-            node[i].e_extracellular(1) = xtra_pot_at_node.getval(k,i)
-        }
-    }
-    run()
-    
-    rvp2 = new RangeVarPlot("v")
-    node[0] rvp2.begin(1)
-    node[20] rvp2.end(0)
-    
-    g3 = new Graph()
-    g3.addobject(rvp2)
-    g3.size(rvp2.left(),rvp2.right(),-90,50)
-
-    rvp2.to_vector(vspace_vec)
-    vspace_mat.setrow(count,vspace_vec)
-    count = count + 1
-}
-
-objref f
-f=new File()
-f.wopen("Vm_AtONENode_OverALLTime.txt")
-vspace_mat.fprint(f)
-f.close()
-*/
-// end show how node changes over time
-
-
-
-// write Vm matrix --> matlab
-/*
-objref vnode, vnode_mat
-vnode_mat = new Matrix(tstop/dtime+1,nnode-1)
-vnode     = new Vector(tstop/dtime+1)
-
-for j = 0, nnode-2 {
-    for k = 0, tstop/dtime-1 {
-        access node[j]
-        node[j].e_extracellular(1) = xtra_pot_at_node.getval(k,j)
-    }
-    vnode.record(&node[j].v(.5))
-    run()
-    vnode_mat.setcol(j,vnode)
-}
-
-objref f
-f=new File()
-f.wopen("Vm_AtNode_OverTime.txt")
-vnode_mat.fprint(f)
-f.close()
-*/
- 
-// end write Vm matrix --> matlab
-
-objectvar rvp, g
-
-rvp = new RangeVarPlot("v")
-node[0] rvp.begin(0)
-node[20] rvp.end(1)
-g = new Graph()
-g.addobject(rvp)
-g.size(rvp.left(),rvp.right(),-90,50)
-

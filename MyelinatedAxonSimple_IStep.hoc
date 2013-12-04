@@ -102,7 +102,7 @@ proc potential_field(){
 		r = sqrt((pos_nx.get[i] - XE)^2 + (pos_ny.get[i] - YE)^2 + (pos_nz.get[i] - ZE)^2)
 		phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4
 		node[i].e_extracellular(0.5) = phi_e.x[i]
-        if (t == 2/dt){
+        if (t == 2){
             phi_ex.x[i] = phi_e.x[i]
         }
 	}
@@ -121,6 +121,48 @@ proc stimulate(){
 // RUN THE CODE
 stimulate()
 
+objref pos_vec, rvp2, vspace_mat, vspace_vec, g3, vnode2, f
+
+proc spatialplots(){
+    // show how node changes over time
+    
+    pos_vec = new Vector(pos_nx.get(nnode-1))
+    for i=0, pos_vec.size()-1 {
+        pos_vec.set(i,i)
+    }
+    
+    vspace_mat = new Matrix(int(((DUR+9)/dt)/50)+2,pos_vec.size()-1)
+    vspace_vec = new Vector(pos_vec.size()-1)
+    vnode2 = new Vector()
+    node_num = 11
+    access node[node_num]
+    count = 0
+    for(k = DEL/dt; k < (DEL+DUR+9)/dt-1; k = k + 50) {
+        tstop = (k)*dt
+        
+        
+        rvp2 = new RangeVarPlot("v")
+        node[0] rvp2.begin(1)
+        node[20] rvp2.end(0)
+        
+        g3 = new Graph()
+        g3.addobject(rvp2)
+        g3.size(rvp2.left(),rvp2.right(),-90,50)
+        rvp2.to_vector(vspace_vec)
+        vspace_mat.setrow(count,vspace_vec)
+        count = count + 1
+    }
+    
+    f=new File()
+    f.wopen("Vm_AtONENode_OverALLTime.txt")
+    vspace_mat.fprint(f)
+    f.close()
+    
+    // end show how node changes over time
+    
+}
+
+spatialplots()
 
 
 

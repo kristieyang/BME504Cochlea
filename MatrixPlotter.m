@@ -35,7 +35,7 @@ max(B(:))
 
 legend(str)
 
-C = textread('Vm_AtONENode_OverALLTime.txt');
+C = dlmread('Vm_AtONENode_OverALLTime.txt','t',1);
 mat_size = size(C);
 space = linspace(0,mat_size(2)-1,305);
 
@@ -44,9 +44,10 @@ figure(3)
 clf
 suptitle('Spatial plots of Vm at node 11 (center node, under electrode)')
 for i=2:mat_size(1)-1
+
     subplot(5,2,i-1)
     plot(space,C(i,1:305),'LineWidth',2)
-    fixplot()
+    %fixplot()
     str{i} = sprintf('t = %0.2f',((i-2)*50)*0.025);
     title(str{i})
     xlabel('Length of Peripheral Process, µm')
@@ -109,42 +110,42 @@ ylabel('Extracellular Potential, Ve (mV)')
 title('Extracellular Potential at Each Node, created by point source electrode')
 axis([0 2680 -60 0])
 
-E = textread('SuccessfulExStim.txt');
-figure(5)
-clf
-subplot(3,1,1)
-plot(x,Vec,'bo-')
-fixplot()
-xlabel('Dist along Peripheral Process (\mum)')
-ylabel('Extracellular Potential, Ve (mV)')
-title('Extracellular Potential at Each Node, created by point source electrode')
-axis([0 2680 -60 0])
-
-j=1
-FirstDiff = (Vec(j+1)-Vec(j))/141
-for j=2:length(Vec)-1
-    FirstDiff(j) = (Vec(j-1)-2*Vec(j)+Vec(j+1))/282
-end
-FirstDiff(j+1) = (Vec(j+1)-Vec(j))/141
-
-j=1
-SecondDiff = (FirstDiff(j+1)-FirstDiff(j))/141
-for j=2:length(FirstDiff)-1
-    SecondDiff(j) = (FirstDiff(j-1)-2*FirstDiff(j)+FirstDiff(j+1))/282
-end
-SecondDiff(j+1) = (FirstDiff(j+1)-FirstDiff(j))/141
-
-subplot(3,1,2)
-plot(0:141:2680, SecondDiff,'bo-')
-fixplot()
-axis([0 2680 -0.002 0.001])
-title('Second Difference Induced by Extracellular Stimulation')
-xlabel('Time, ms')
-ylabel('Second Difference, mV/µm^2')
-
-subplot(3,1,3)
-plot(E(:,1),E(:,2))
-fixplot()
-title('Action Potential Induced at Node 11 (central node)')
-xlabel('Time, ms')
-ylabel('Membrane Voltage, mV')
+% E = textread('SuccessfulExStim.txt');
+% figure(5)
+% clf
+% subplot(3,1,1)
+% plot(x,Vec,'bo-')
+% fixplot()
+% xlabel('Dist along Peripheral Process (\mum)')
+% ylabel('Extracellular Potential, Ve (mV)')
+% title('Extracellular Potential at Each Node, created by point source electrode')
+% axis([0 2680 -60 0])
+% 
+% j=1
+% FirstDiff = (Vec(j+1)-Vec(j))/141
+% for j=2:length(Vec)-1
+%     FirstDiff(j) = (Vec(j-1)-2*Vec(j)+Vec(j+1))/282
+% end
+% FirstDiff(j+1) = (Vec(j+1)-Vec(j))/141
+% 
+% j=1
+% SecondDiff = (FirstDiff(j+1)-FirstDiff(j))/141
+% for j=2:length(FirstDiff)-1
+%     SecondDiff(j) = (FirstDiff(j-1)-2*FirstDiff(j)+FirstDiff(j+1))/282
+% end
+% SecondDiff(j+1) = (FirstDiff(j+1)-FirstDiff(j))/141
+% 
+% subplot(3,1,2)
+% plot(0:141:2680, SecondDiff,'bo-')
+% fixplot()
+% axis([0 2680 -0.002 0.001])
+% title('Second Difference Induced by Extracellular Stimulation')
+% xlabel('Time, ms')
+% ylabel('Second Difference, mV/µm^2')
+% 
+% subplot(3,1,3)
+% plot(E(:,1),E(:,2))
+% fixplot()
+% title('Action Potential Induced at Node 11 (central node)')
+% xlabel('Time, ms')
+% ylabel('Membrane Voltage, mV')

@@ -44,15 +44,16 @@ figure(3)
 clf
 suptitle('Spatial plots of Vm at node 11 (center node, under electrode)')
 for i=2:mat_size(1)-1
+    
     subplot(5,2,i-1)
     plot(space,C(i,1:305),'LineWidth',2)
-    fixplot()
+    %fixplot()
     str{i} = sprintf('t = %0.2f',((i-2)*50)*0.025);
     title(str{i})
     xlabel('Length of Peripheral Process, µm')
     ylabel('Vm, mV')
     axis([0 2680 min(min(C(2:end,:))) max(max(C(2:end,:)))])
-    hold all
+    %hold all
 end
 %legend(str)
 
@@ -122,20 +123,20 @@ axis([0 2680 -60 0])
 
 j=1
 FirstDiff = (Vec(j+1)-Vec(j))/141
-for j=2:length(Vec)-2
+for j=2:length(Vec)-1
     FirstDiff(j) = (Vec(j-1)-2*Vec(j)+Vec(j+1))/282
 end
-FirstDiff(j+1) = (Vec(j+2)-Vec(j+1))/141
+FirstDiff(j+1) = (Vec(j+1)-Vec(j))/141
 
 j=1
 SecondDiff = (FirstDiff(j+1)-FirstDiff(j))/141
-for j=2:length(FirstDiff)-2
+for j=2:length(FirstDiff)-1
     SecondDiff(j) = (FirstDiff(j-1)-2*FirstDiff(j)+FirstDiff(j+1))/282
 end
-SecondDiff(j+1) = (FirstDiff(j+2)-FirstDiff(j+1))/141
+SecondDiff(j+1) = (FirstDiff(j+1)-FirstDiff(j))/141
 
 subplot(3,1,2)
-plot(142:141:2539, SecondDiff)
+plot(0:141:2680, SecondDiff,'bo-')
 fixplot()
 axis([0 2680 -0.002 0.001])
 title('Second Difference Induced by Extracellular Stimulation')

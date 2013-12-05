@@ -38,7 +38,7 @@ proc membprop(){
         insert hh
         insert extracellular
         Rm = 1000
-        rhoa = 10      // axial resistivity (ohm-cm)
+        rhoa = 100      // axial resistivity (ohm-cm)
         Ra = rhoa*((l+L)/l)
         cm = 2
     }
@@ -76,7 +76,7 @@ for i=0, nnode-1{
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -.02 //mA
+AMP = -.03 //mA
 DUR = .2
 DEL = 4
 //dt = 0.025
@@ -128,7 +128,7 @@ objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
 vm[10].plot(g,dt)
-vm[20].plot(g,dt,2,1)
+vm[12].plot(g,dt,2,1)
 
 // Matt's Plot *******
 

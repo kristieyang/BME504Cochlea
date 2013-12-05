@@ -5,8 +5,23 @@ load_file("nrngui.hoc")
 load_proc("nrnmainmenu")
 
 create node[1]
+create soma
 objref nodes
 vinit = -65        //initial potential
+
+// make soma and connect to last node---------------------------
+proc connectsoma(){
+    soma{
+         nseg=1
+         diam=30 //um
+         L=30    //um
+         Ra=150  //lumped
+         cm=1
+         insert pas
+         e_pas = -65
+     }
+    connect soma(0), node[nnode-1](0)
+}
 
 // initialize axon-----------------------------------------------
 proc buildaxon() {local k
@@ -48,6 +63,7 @@ proc membprop(){
 // build, connect, change properties, set membrane dynamics-----
 proc make(){
     buildaxon($1)
+    connectsoma()
     physprop()
     membprop()
 }
@@ -84,14 +100,15 @@ DEL = 4
 //dt = 0.025
 tstop = 20
 
-// set electrode pos ********************************************
+// set electrode pos --------------------------------------------
 rho = 500 //Ohm cm //ex_resistivity
 
-XE = 1410  // µm
-YE = 100  // µm
-ZE = 0    // µm //Define electrode position
-
-// end set electrode stim ***************************************
+proc SetElectrodeToFiber(){
+     XE = $1  // µm
+     YE = $2  // µm
+     ZE = $3  // µm
+}
+// end set electrode stim ---------------------------------------
 
 objref dummystim
 create dummy
@@ -116,6 +133,7 @@ proc potential_field(){
 
 // time integrate with constant time step size (intrinsic dt)----
 proc stimulate(){
+    SetElectrodeToFiber(0,140,0) //*****SET XYZ in um*********************
 	finitialize(vinit)
 	while (t<tstop) {	
 		potential_field()

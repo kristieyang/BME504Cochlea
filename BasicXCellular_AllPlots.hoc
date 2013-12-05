@@ -133,21 +133,43 @@ proc potential_field(){
 
 // time integrate with constant time step size (intrinsic dt)----
 proc stimulate(){
-    SetElectrodeToFiber(0,140,0) //*****SET XYZ in um*********************
+    SetElectrodeToFiber(1410,100,0) //*****SET XYZ in um*********************
 	finitialize(vinit)
 	while (t<tstop) {	
 		potential_field()
-	  fadvance()		
-	}	
+	  fadvance()
+	}
+    /*
+	t = 0
+    SetElectrodeToFiber(705,100,0) //*****SET XYZ in um*********************
+	finitialize(vinit)
+	while (t<tstop) {
+		potential_field()
+        fadvance()
+    }
+    t = 0
+    SetElectrodeToFiber(0,100,0) //*****SET XYZ in um*********************
+	finitialize(vinit)
+	while (t<tstop) {
+		potential_field()
+        fadvance()
+    }
+     */
 }
+
+
 
 // Run stimulation through time----------------------------------
 
 stimulate()
 
+
+
+
 // *****************************PLOTTING************************************
 
 // Membrane Voltage plot over Time for Nodes 10 and 12--------------------
+
 objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)

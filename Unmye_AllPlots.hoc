@@ -1,6 +1,3 @@
-// Demonstration of extracellular stimulation
-// Leo Medina 2013-10-28 
-
 load_file("nrngui.hoc")
 load_proc("nrnmainmenu")
 
@@ -12,9 +9,8 @@ proc buildaxon() {
     axon{
         nnode = $1
         nseg=nnode
-        D = 25 //internodal length in µm
-        diam = 0.7*D //µm
-        L = 141*(nnode-1) //µm
+        diam = 0.7*25 //µm
+        L = 2680 //µm
         //Rm = 1000
         Ra = 100// axial resistivity (ohm-cm)
         cm = 2
@@ -53,8 +49,8 @@ for i=0, nnode-1 {
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -.02 //mA
-DUR = 2
+AMP = -.03 //mA
+DUR = .2
 DEL = 4
 //dt = 0.025
 tstop = 20

@@ -76,7 +76,11 @@ for i=0, nnode-1{
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *******************************************
+<<<<<<< HEAD
 AMP = -.025 //mA
+=======
+AMP = -.03 //mA
+>>>>>>> 1b019a7792c2b4011fa638bab77953f0ef7061cc
 DUR = .2
 DEL = 4
 //dt = 0.025

@@ -8,7 +8,7 @@ create node[1]
 objref nodes
 vinit = -65        //initial potential
 
-// initialize axon
+// initialize axon-----------------------------------------------
 proc buildaxon() {local k
     nnode = $1
     create node[nnode]
@@ -20,7 +20,7 @@ proc buildaxon() {local k
     }
     finitialize(vinit)
 }
-// axon physical properties
+// axon physical properties--------------------------------------
 proc physprop(){
     forsec nodes{
         D = 25 //internodal length in µm
@@ -31,7 +31,7 @@ proc physprop(){
         define_shape()
     }
 }
-// membrane properties
+// membrane properties-------------------------------------------
 proc membprop(){
     
     forsec nodes{
@@ -45,7 +45,7 @@ proc membprop(){
     
 }
 
-
+// build, connect, change properties, set membrane dynamics-----
 proc make(){
     buildaxon($1)
     physprop()
@@ -53,6 +53,8 @@ proc make(){
 }
 
 make(21)
+
+// Extracellular Potential Calculations-------------------------
 
 //for keeping track of node positions and Ve at nodes
 objref pos_nx, pos_ny, pos_nz
@@ -75,21 +77,21 @@ for i=0, nnode-1{
 //dummy stimulus only to control waveform parameters
 //The 'dummy' section has nothing to do with the fiber
 
-// set electrode stim *****
+// set electrode stim *******************************************
 AMP = -.03 //mA
 DUR = .2
 DEL = 4
 //dt = 0.025
 tstop = 20
 
-// set electrode pos
+// set electrode pos --------------------------------------------
 rho = 500 //Ohm cm //ex_resistivity
 
-XE = 1410  // µm
-YE = 100  // µm
-ZE = 0    // µm //Define electrode position
+     XE = 1410  // µm
+     YE = 100  // µm
+     ZE = 0  // µm
 
-// end set electrode stim *****
+// end set electrode stim ---------------------------------------
 
 objref dummystim
 create dummy
@@ -104,7 +106,7 @@ phi_e = new Vector(nnode,0)
 phi_ex = new Vector(nnode,0)
 proc potential_field(){
 	for i=0, nnode-1{
-		r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um. Note that we are assuming that the electrode is at position
+		r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um
 		phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4 // mV
         node[i].e_extracellular(0.5) = phi_e.x[i]
         phi_ex.set(i,AMP * (rho / 4 / PI)*(1/r)*10^4)
@@ -112,17 +114,43 @@ proc potential_field(){
     
 }
 
-// time integrate with constant time step size
+// time integrate with constant time step size (intrinsic dt)----
 proc stimulate(){
 	finitialize(vinit)
 	while (t<tstop) {	
 		potential_field()
-	  fadvance()		
-	}	
+	  fadvance()
+	}
+    /*
+	t = 0
+    SetElectrodeToFiber(705,100,0) //*****SET XYZ in um*********************
+	finitialize(vinit)
+	while (t<tstop) {
+		potential_field()
+        fadvance()
+    }
+    t = 0
+    SetElectrodeToFiber(0,100,0) //*****SET XYZ in um*********************
+	finitialize(vinit)
+	while (t<tstop) {
+		potential_field()
+        fadvance()
+    }
+     */
 }
 
-// ----------------------- Plotting -----------------------------------------
+
+
+// Run stimulation through time----------------------------------
+
 stimulate()
+
+
+
+
+// *****************************PLOTTING************************************
+
+// Membrane Voltage plot over Time for Nodes 10 and 12--------------------
 
 objref g
 g = new Graph()
@@ -130,20 +158,14 @@ g.size(0,tstop,vinit-10,70)
 vm[10].plot(g,dt)
 vm[12].plot(g,dt,2,1)
 
-// Matt's Plot *******
-
-// Extracellular potential vs distance at one time point
+// Extracellular potential vs distance at some time during Stimulation----
 objref vec, g2
 g2 = new Graph()
 g2.size(0, 2680, -70,10)
 vec = phi_ex
 vec.plot(g2, pos_nx, 3,2)
 
-// End Matt's Plot *******
-
-
-// Begin Spatial Plot at t = DUR+DEL
-
+// Spatial Plot at t = DUR+DEL--------------------------------------------
 objref rvp, g4
 proc snapshot(){
 
@@ -160,9 +182,9 @@ g4.size(rvp.left(),rvp.right(),-90,50)
     
 }
 
-// End Spatial Plot at t = DUR+DEL
 
-// Spatial Plots Begin *******
+
+// Spatial Plots at Multiple Time Points----------------------------------
 
 objref pos_vec, rvp2, vspace_mat, vspace_vec, f
 
@@ -197,6 +219,6 @@ proc spatialplots(){
 spatialplots()
 snapshot()
 
-// End Spatial Plots ******
+// End Spatial Plots------------------------------------------------------
 
 

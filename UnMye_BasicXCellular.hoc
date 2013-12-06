@@ -1,40 +1,91 @@
-// Demonstration of extracellular stimulation
-// Leo Medina 2013-10-28 
-
 load_file("nrngui.hoc")
 load_proc("nrnmainmenu")
 
-create node[1]
-objref nodes
-vinit = -65        //initial potential
+create myelin[1], unmyelin[1]
+objref myelins, unmyelins, r
+vinit = -65        //initial potential, mV
 
-// initialize axon
-proc buildaxon() {local k
+func round() {
+    if ($1>0) {
+        return int($1+0.5)
+    } else {
+        return int($1-0.5)
+    }
+}
+
+objref randnum
+randnum = new Vector(25,0)
+
+myelins = new SectionList()
+unmyelins = new SectionList()
+
+proc unmyelinate() {
     nnode = $1
-    create node[nnode]
-    nodes = new SectionList()
-    forsec "node" nodes.append
-    access node[0]
-    for k = 0, nnode-2{
-        connect node[k+1](1),node[k](0)
+    r = new Random()
+    r.uniform(0,1)
+    num_mye = 1
+    num_unmye = 1
+    for i = 0, nnode-2 {
+        randnum.set(i,round(r.repick()))
+        print randnum.get(i)
+        if (randnum.get(i) == 0) {
+            create unmyelin[num_unmye]
+            num_unmye = num_unmye+1
+            
+            Ra = 100
+            cm = 2
+            insert hh
+            gnabar_hh = 1.2
+            gkbar_hh = 0.36
+            gl_hh = 0.003
+            print "UnMY"
+            
+        } else {
+            create myelin[num_mye]
+            num_mye = num_mye+1
+            
+            cm = 0
+            insert pas
+            g_pas = 0.0002
+            e_pas = -70.0
+            print "MY"
+            s
+        }
+        
     }
     finitialize(vinit)
+    
+    forsec "myelin" myelins.append
+    forsec "unmyelin" unmyelins.append
+    physprop()
+    membprop()
 }
+
+
 // axon physical properties
 proc physprop(){
-    forsec nodes{
-        D = 25 //internodal length in µm
+    forsec myelins {
+        D = 1.4 //internodal length in µm
         diam = 0.7*D //µm
         l = 1 //µm
-        L = 100*1.4 //µm
+        L = 100*D //µm
         nseg = 15
         define_shape()
+    }
+    forsec unmyelins {
+        D = 1.4 //internodal length in µm
+        diam = 0.7*D //µm
+        l = 1 //µm
+        L = 100*D //µm
+        nseg = 15
+        define_shape()
+        
     }
 }
 // membrane properties
 proc membprop(){
     
-    forsec nodes{
+    forsec myelins {
         insert hh
         insert extracellular
         Rm = 1000
@@ -43,16 +94,23 @@ proc membprop(){
         cm = 2
     }
     
+    forsec unmyelins {
+        insert pas
+        //insert extracellular
+        Rm = 10000
+        rhoa = 100
+        Ra = rhoa*((l+L)/l)
+        cm = 0   //*
+    }
 }
 
 
 proc make(){
-    buildaxon($1)
-    physprop()
-    membprop()
+    unmyelinate($1)
+
 }
 
-make(21)
+make(25)
 
 //for keeping track of node positions and Ve at nodes
 objref pos_nx, pos_ny, pos_nz
@@ -67,9 +125,9 @@ for i=0, nnode-1{
 
 // for recording membrane potentials
 objref vm[nnode]
-for i=0, nnode-1{
+for i=0, num_mye-2{
 	 vm[i] = new Vector(tstop/dt,0)
-     vm[i].record(&node[i].v(0.5))
+     vm[i].record(&myelin[i].v(0.5))
 }
 
 //dummy stimulus only to control waveform parameters
@@ -106,7 +164,7 @@ proc potential_field(){
 	for i=0, nnode-1{
 		r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um. Note that we are assuming that the electrode is at position
 		phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4 // mV
-        node[i].e_extracellular(0.5) = phi_e.x[i]
+        myelin[i].e_extracellular(0.5) = phi_e.x[i]
         phi_ex.set(i,AMP * (rho / 4 / PI)*(1/r)*10^4)
 	}
     
@@ -122,6 +180,7 @@ proc stimulate(){
 }
 
 // ----------------------- Plotting -----------------------------------------
+
 stimulate()
 
 objref g
@@ -131,7 +190,7 @@ vm[10].plot(g,dt)
 vm[12].plot(g,dt,2,1)
 
 // Matt's Plot *******
-
+/*
 // Extracellular potential vs distance at one time point
 objref vec, g2
 g2 = new Graph()
@@ -145,20 +204,18 @@ vec.plot(g2, pos_nx, 3,2)
 // Begin Spatial Plot at t = DUR+DEL
 
 objref rvp, g4
-proc snapshot(){
 
 tstop = DEL+DUR
 
 stimulate()
 rvp = new RangeVarPlot("v")
-node[0] rvp.begin(0)
-node[20] rvp.end(1)
+unmyelin[0] rvp.begin(0)
+unmyelin[num_unmye-2] rvp.end(1)
 
 g4 = new Graph()
 g4.addobject(rvp)
 g4.size(rvp.left(),rvp.right(),-90,50)
-    
-}
+
 
 // End Spatial Plot at t = DUR+DEL
 
@@ -177,8 +234,8 @@ proc spatialplots(){
         stimulate()
         
         rvp2 = new RangeVarPlot("v")
-        node[0] rvp2.begin(0)
-        node[20] rvp2.end(1)
+        unmyelin[0] rvp2.begin(0)
+        unmyelin[num_unmye-2] rvp2.end(1)
         
         rvp2.to_vector(vspace_vec)
         vspace_mat.setrow(count,vspace_vec)
@@ -195,8 +252,7 @@ proc spatialplots(){
 }
 
 spatialplots()
-snapshot()
-
+*/
 // End Spatial Plots ******
 
 

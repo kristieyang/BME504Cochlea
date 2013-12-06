@@ -12,7 +12,7 @@ clf
 suptitle('Spatial plots of Vm at node 11 (center node, under electrode)')
 for i=2:mat_size(1)-1
     subplot(5,2,i-1)
-    plot(space,C(i,1:305),'LineWidth',2)
+    plot(space,C(i,1:mat_size(2)-1),'LineWidth',2)
     fixplot()
     str{i} = sprintf('t = %0.2f',((i-2)*50)*0.025);
     title(str{i})

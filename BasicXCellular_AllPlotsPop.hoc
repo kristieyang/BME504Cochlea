@@ -11,11 +11,14 @@ vinit = -65        //initial potential
 // initialize axon
 proc buildaxon() {local k
     nnode = $1
-    create node[nnode]
+    totnode = $1*$2
+    print totnode
+    create node[totnode]
     nodes = new SectionList()
     forsec "node" nodes.append
     access node[0]
-    for k = 0, nnode-2{
+    print (i+1)*(nnode)
+    for k = 0+i*nnode, (i+1)*(nnode)-2{
         connect node[k+1](1),node[k](0)
     }
     finitialize(vinit)
@@ -23,10 +26,10 @@ proc buildaxon() {local k
 // axon physical properties
 proc physprop(){
     forsec nodes{
-        D = 25 //internodal length in µm
+        D = 1.4 //internodal length in µm
         diam = 0.7*D //µm
         l = 1 //µm
-        L = 100*1.4 //µm
+        L = 100*D //µm
         nseg = 15
         define_shape()
     }
@@ -35,7 +38,7 @@ proc physprop(){
 proc membprop(){
     
     forsec nodes{
-        insert hh
+        insert pas
         insert extracellular
         Rm = 1000
         rhoa = 100      // axial resistivity (ohm-cm)
@@ -47,12 +50,15 @@ proc membprop(){
 
 
 proc make(){
-    buildaxon($1)
+    pop = $2
+    for i=0, pop-1 {
+        buildaxon($1, i, pop)
+    }
     physprop()
     membprop()
 }
 
-make(21)
+make(21,25)
 
 //for keeping track of node positions and Ve at nodes
 objref pos_nx, pos_ny, pos_nz
@@ -123,80 +129,5 @@ proc stimulate(){
 
 // ----------------------- Plotting -----------------------------------------
 stimulate()
-
-objref g
-g = new Graph()
-g.size(0,tstop,vinit-10,70)
-vm[10].plot(g,dt)
-vm[12].plot(g,dt,2,1)
-
-// Matt's Plot *******
-
-// Extracellular potential vs distance at one time point
-objref vec, g2
-g2 = new Graph()
-g2.size(0, 2680, -70,10)
-vec = phi_ex
-vec.plot(g2, pos_nx, 3,2)
-
-// End Matt's Plot *******
-
-
-// Begin Spatial Plot at t = DUR+DEL
-
-objref rvp, g4
-proc snapshot(){
-
-tstop = DEL+DUR
-
-stimulate()
-rvp = new RangeVarPlot("v")
-node[0] rvp.begin(0)
-node[20] rvp.end(1)
-
-g4 = new Graph()
-g4.addobject(rvp)
-g4.size(rvp.left(),rvp.right(),-90,50)
-    
-}
-
-// End Spatial Plot at t = DUR+DEL
-
-// Spatial Plots Begin *******
-
-objref pos_vec, rvp2, vspace_mat, vspace_vec, f
-
-proc spatialplots(){
-    // show how node changes over time
-    
-    vspace_mat = new Matrix(9,305)
-    vspace_vec = new Vector(9)
-    count = 0
-    for(k = DEL/dt; k < (DEL+DUR+9)/dt-1; k = k + 50) {
-        tstop = (k)*dt
-        stimulate()
-        
-        rvp2 = new RangeVarPlot("v")
-        node[0] rvp2.begin(0)
-        node[20] rvp2.end(1)
-        
-        rvp2.to_vector(vspace_vec)
-        vspace_mat.setrow(count,vspace_vec)
-        count = count + 1
-    }
-    
-    f=new File()
-    f.wopen("Vm_AtONENode_OverALLTime.txt")
-    vspace_mat.fprint(f)
-    f.close()
-    
-    // end show how node changes over time
-    
-}
-
-spatialplots()
-snapshot()
-
-// End Spatial Plots ******
 
 

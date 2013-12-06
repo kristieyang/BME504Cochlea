@@ -1,0 +1,176 @@
+load_file("nrngui.hoc")
+load_proc("nrnmainmenu")
+
+create axon
+vinit = -65        //initial potential
+
+// initialize axon
+proc buildaxon() {
+    axon{
+        nnode = $1
+        nseg=nnode
+        diam = 0.7*25 //µm
+        L = 2680 //µm
+        //Rm = 1000
+        Ra = 100// axial resistivity (ohm-cm)
+        cm = 2
+        insert pas
+        e_pas=-65
+        insert hh
+        insert extracellular
+        define_shape()
+    }
+}
+
+buildaxon(21)
+
+
+//for keeping track of node positions and Ve at nodes
+objref pos_nx, pos_ny, pos_nz
+pos_nx = new Vector(nnode,0)
+pos_ny = new Vector(nnode,0)
+pos_nz = new Vector(nnode,0)
+
+for i=0, nnode-1{
+    pos_nx.set(i, i*141) // position vector of all the nodes
+}
+//pos_nx.mul(1e-3) //convert from um to mm
+
+// for recording membrane potentials
+objref vm[nnode]
+for i=0, nnode-1 {
+    pos = i/(nnode-1)
+    //print pos
+    vm[i] = new Vector(tstop/dt,0)
+    vm[i].record(&axon.v(pos))
+}
+
+//dummy stimulus only to control waveform parameters
+//The 'dummy' section has nothing to do with the fiber
+
+// set electrode stim *****
+AMP = -.03 //mA
+DUR = .2
+DEL = 4
+//dt = 0.025
+tstop = 20
+
+// set electrode pos
+rho = 500 //Ohm cm //ex_resistivity
+
+XE = 1410  // µm
+YE = 100  // µm
+ZE = 0    // µm //Define electrode position
+
+// end set electrode stim *****
+
+objref dummystim
+create dummy
+dummy dummystim = new IClamp(.5)	// 0.5 is the normalized location
+dummystim.del = DEL
+dummystim.dur = DUR
+dummystim.amp = AMP
+
+// extracellular potentials
+objref phi_e, phi_ex
+phi_e = new Vector(nnode,0)
+phi_ex = new Vector(nnode,0)
+proc potential_field(){
+	for i=0, nnode-1{
+        pos = i/(nnode-1)
+        print pos
+		r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um. Note that we are assuming that the electrode is at position
+		phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4 // mV
+        axon.e_extracellular(pos) = phi_e.x[i]
+        phi_ex.set(i, AMP * (rho / 4 / PI)*(1/r)*10^4)
+	}
+    
+}
+
+// time integrate with constant time step size
+proc stimulate(){
+	finitialize(vinit)
+	while (t<tstop) {	
+		potential_field()
+	  fadvance()		
+	}	
+}
+
+// ----------------------- Plotting -----------------------------------------
+stimulate()
+
+objref g
+g = new Graph()
+g.size(0,tstop,vinit-10,70)
+vm[10].plot(g,dt)
+vm[15].plot(g,dt,2,1)
+// Matt's Plot *******
+
+// Extracellular potential vs distance at one time point
+objref vec, g2
+g2 = new Graph()
+g2.size(0, 2680, -70,10)
+vec = phi_ex
+vec.plot(g2, pos_nx, 3,2)
+
+// End Matt's Plot *******
+
+
+// Begin Spatial Plot at t = DUR+DEL
+
+objref rvp, g4
+proc snapshot(){
+
+tstop = DEL+DUR
+
+stimulate()
+rvp = new RangeVarPlot("v")
+axon(0) rvp.begin(0)
+axon(1) rvp.end(1)
+
+g4 = new Graph()
+g4.addobject(rvp)
+g4.size(rvp.left(),rvp.right(),-90,50)
+    
+}
+
+// End Spatial Plot at t = DUR+DEL
+
+// Spatial Plots Begin *******
+
+objref pos_vec, rvp2, vspace_mat, vspace_vec, f
+
+proc spatialplots(){
+    // show how node changes over time
+    
+    vspace_mat = new Matrix(9,nnode+2)
+    vspace_vec = new Vector(9)
+    count = 0
+    for(k = DEL/dt; k < (DEL+DUR+9)/dt-1; k = k + 50) {
+        tstop = (k)*dt
+        stimulate()
+        
+        rvp2 = new RangeVarPlot("v")
+        axon(0) rvp2.begin(0)
+        axon(1) rvp2.end(1)
+        
+        rvp2.to_vector(vspace_vec)
+        vspace_mat.setrow(count,vspace_vec)
+        count = count + 1
+    }
+    
+    f=new File()
+    f.wopen("Vm_AtONENode_OverALLTime.txt")
+    vspace_mat.fprint(f)
+    f.close()
+    
+    // end show how node changes over time
+    
+}
+
+spatialplots()
+snapshot()
+
+// End Spatial Plots ******
+
+

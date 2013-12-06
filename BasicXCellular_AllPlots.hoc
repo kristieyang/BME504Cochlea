@@ -23,7 +23,7 @@ proc physprop(){
     forsec nodes{
         D = 25 //µm
         diam = 0.7*D //µm
-        L = 1 // nodal length in µm
+        L = 10 // nodal length in µm
         nseg = 1
         define_shape()
     }
@@ -76,7 +76,7 @@ for i=0, nnode-1{
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *******************************************
-AMP = -.020 //mA
+AMP = -.025 //mA
 DUR = .2
 DEL = 4
 //dt = 0.025
@@ -183,7 +183,6 @@ g4.size(rvp.left(),rvp.right(),-90,50)
 
 
 // Spatial Plots at Multiple Time Points----------------------------------
-
 objref pos_vec, rvp2, vspace_mat, vspace_vec, f
 
 proc spatialplots(){
@@ -216,6 +215,7 @@ proc spatialplots(){
 
 spatialplots()
 snapshot()
+
 
 // End Spatial Plots------------------------------------------------------
 

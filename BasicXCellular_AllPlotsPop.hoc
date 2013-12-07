@@ -61,6 +61,8 @@ rdistfile = new File("rdist.txt")
 rdistmat = new Matrix()
 rdistfile.ropen()
 o = rdistmat.scanf(rdistfile,NROW,NCOL)
+ 
+
 // ----------------------------------------------------
 
 objref pos_nx, pos_ny, pos_nz
@@ -103,21 +105,21 @@ dummystim.dur = DUR
 dummystim.amp = AMP
 
 // extracellular potentials
-objref phi_e, phi_ex, vm20, APfile, VmMatrix
+objref phi_e, phi_ex, vm20, APfile, VmMatrix, rmat,mobj
 VmMatrix = new Matrix(NROW,tstop/dt+1)
 
 APfile=new File()
 APfile.wopen("Vm_Node20_Matrix1.txt")
 
 
-
+rmat = new Matrix(NROW,NCOL)
 phi_e = new Vector(nnode,0)
 phi_ex = new Vector(nnode,0)
 proc potential_field(){
         for i=0, nnode-1{
             r = rdistmat.getval($1,i)
-            //r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um
             print r
+            //r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um
             phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4 // mV
             node[i].e_extracellular(0.5) = phi_e.x[i]
             phi_ex.set(i,AMP * (rho / 4 / PI)*(1/r)*10^4)
@@ -137,7 +139,6 @@ proc stimulate(){
             potential_field(numrow)
             fadvance()
         }
-        
     // for recording membrane potentials
     VmMatrix.setrow(numrow, vm20)
         
@@ -170,7 +171,11 @@ proc stimulate(){
 stimulate()
 VmMatrix.fprint(APfile)
 APfile.close()
-
+objref checkrfile
+checkrfile = new File()
+checkrfile.wopen("CheckRFile.txt")
+rdistmat.fprint(checkrfile)
+checkrfile.close()
 
 
 // *****************************PLOTTING************************************

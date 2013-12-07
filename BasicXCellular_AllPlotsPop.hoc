@@ -117,8 +117,16 @@ phi_e = new Vector(nnode,0)
 phi_ex = new Vector(nnode,0)
 proc potential_field(){
         for i=0, nnode-1{
+<<<<<<< HEAD
+            r = rvec.getval($1,i)
+=======
             r = rdistmat.getval($1,i)
+<<<<<<< HEAD
             //print r
+=======
+            print r
+>>>>>>> 039c1338890aaf6624f3ef085f5ab8e016dd2371
+>>>>>>> 1e142c785958f788886abadfc6be346b00b3beda
             //r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um
             phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4 // mV
             node[i].e_extracellular(0.5) = phi_e.x[i]

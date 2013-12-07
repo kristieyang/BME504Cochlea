@@ -82,7 +82,7 @@ for i=0, nnode-1{
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *******************************************
-AMP = -.03 //mA
+AMP = -.1 //mA
 DUR = .2
 DEL = 4
 //dt = 0.025
@@ -121,8 +121,12 @@ proc potential_field(){
             r = rvec.getval($1,i)
 =======
             r = rdistmat.getval($1,i)
+<<<<<<< HEAD
+            //print r
+=======
             print r
 >>>>>>> 039c1338890aaf6624f3ef085f5ab8e016dd2371
+>>>>>>> 1e142c785958f788886abadfc6be346b00b3beda
             //r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um
             phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4 // mV
             node[i].e_extracellular(0.5) = phi_e.x[i]
@@ -138,11 +142,14 @@ vm20.record(&node[20].v(0.5))
 proc stimulate(){
 	finitialize(vinit)
 	for numrow = 0, NROW-1 {
-    
+        //print numrow
+        t = 0
+        finitialize(vinit)
         while (t<tstop) {
             potential_field(numrow)
             fadvance()
         }
+
     // for recording membrane potentials
     VmMatrix.setrow(numrow, vm20)
         

@@ -53,17 +53,16 @@ make(21)
 
 // Extracellular Potential Calculations-------------------------
 
-// read data file---------------------------------------
-objref rdistfile, rdistmat
-NROW = 100
-NCOL = nnode
-rdistfile = new File("rdist.txt")
-rdistmat = new Matrix()
-rdistfile.ropen()
-o = rdistmat.scanf(rdistfile,NROW,NCOL)
- 
+// read data file
+objref rvec, f
+f = new File("rdist.txt")
+f.ropen()
+rvec = new Matrix()
+rvec.scanf(f,nnode,100)
+NROW = rvec.nrow
+NCOL = rvec.ncol
 
-// ----------------------------------------------------
+//for keeping track of node positions and Ve at nodes
 
 objref pos_nx, pos_ny, pos_nz
 pos_nx = new Vector(nnode,0)
@@ -105,25 +104,19 @@ dummystim.dur = DUR
 dummystim.amp = AMP
 
 // extracellular potentials
-objref phi_e, phi_ex, vm20, APfile, VmMatrix, rmat,mobj
-VmMatrix = new Matrix(NROW,tstop/dt+1)
+objref phi_e, phi_ex, vm20, APfile, VmMatrix
+VmMatrix = new Matrix(NCOL,tstop/dt+1)
 
 APfile=new File()
 APfile.wopen("Vm_Node20_Matrix1.txt")
 
-
-rmat = new Matrix(NROW,NCOL)
 phi_e = new Vector(nnode,0)
 phi_ex = new Vector(nnode,0)
 proc potential_field(){
         for i=0, nnode-1{
-<<<<<<< HEAD
-            r = rvec.getval($1,i)
-=======
-            r = rdistmat.getval($1,i)
-            print r
->>>>>>> 039c1338890aaf6624f3ef085f5ab8e016dd2371
+            r = rvec.getval(i,$1)
             //r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um
+            //print r
             phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4 // mV
             node[i].e_extracellular(0.5) = phi_e.x[i]
             phi_ex.set(i,AMP * (rho / 4 / PI)*(1/r)*10^4)
@@ -137,15 +130,15 @@ vm20.record(&node[20].v(0.5))
 // time integrate with constant time step size (intrinsic dt)----
 proc stimulate(){
 	finitialize(vinit)
-	for numrow = 0, NROW-1 {
-    
+	for numcol = 0, NCOL-1 {
         while (t<tstop) {
-            potential_field(numrow)
+            potential_field(numcol)
             fadvance()
         }
     // for recording membrane potentials
-    VmMatrix.setrow(numrow, vm20)
-        
+    VmMatrix.setrow(numcol, vm20)
+        t=0
+        finitialize(vinit)
     }
     
         
@@ -175,11 +168,7 @@ proc stimulate(){
 stimulate()
 VmMatrix.fprint(APfile)
 APfile.close()
-objref checkrfile
-checkrfile = new File()
-checkrfile.wopen("CheckRFile.txt")
-rdistmat.fprint(checkrfile)
-checkrfile.close()
+
 
 
 // *****************************PLOTTING************************************

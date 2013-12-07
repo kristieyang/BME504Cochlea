@@ -53,27 +53,15 @@ make(21)
 
 // Extracellular Potential Calculations-------------------------
 
-// read data file
-objref rdistfile, rvec
+// read data file---------------------------------------
+objref rdistfile, rdistmat
 NROW = 100
 NCOL = nnode
-rvec = new Matrix(NROW,NCOL)
-proc fillmat() {local i localobj vec
-    for i = 0, NROW-1 {
-        vec = new Vector(NCOL)
-        vec.indgen.add(1).mul(0.1+i)
-        rvec.setrow(i, vec)
-    }
-}
-
-fillmat()
-rdistfile=new File("rdist.txt")
-rdistfile.wopen()
-rvec.fprint(0,rdistfile)
-print rvec.getrow(0)
-rdistfile.close()
-
-//for keeping track of node positions and Ve at nodes
+rdistfile = new File("rdist.txt")
+rdistmat = new Matrix()
+rdistfile.ropen()
+o = rdistmat.scanf(rdistfile,NROW,NCOL)
+// ----------------------------------------------------
 
 objref pos_nx, pos_ny, pos_nz
 pos_nx = new Vector(nnode,0)
@@ -127,8 +115,8 @@ phi_e = new Vector(nnode,0)
 phi_ex = new Vector(nnode,0)
 proc potential_field(){
         for i=0, nnode-1{
-            //r = rvec.getval($1,i)
-            r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um
+            r = rdistmat.getval($1,i)
+            //r = sqrt((pos_nx.get(i) - XE)^2 + (pos_ny.get(i) - YE)^2 + (pos_nz.get(i) - ZE)^2) //um
             print r
             phi_e.x[i] = dummystim.i * (rho / 4 / PI)*(1/r)*10^4 // mV
             node[i].e_extracellular(0.5) = phi_e.x[i]

@@ -161,7 +161,7 @@ proc stimulate(){
 // Run stimulation through time----------------------------------
 
 stimulate()
-VmMatrix.fprint(APfile)
+VmMatrix.fprint(0,APfile)
 APfile.close()
 
 // *****************************PLOTTING************************************

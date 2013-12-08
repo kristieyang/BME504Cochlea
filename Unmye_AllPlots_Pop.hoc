@@ -9,8 +9,9 @@ proc buildaxon() {
     axon{
         nnode = $1
         nseg=nnode
-        diam = 0.7*25 //µm
-        L = 2680 //µm
+        D = 1.5
+        diam = 0.7*D //µm
+        L = 907 //µm
         //Rm = 1000
         Ra = 100// axial resistivity (ohm-cm)
         cm = 2
@@ -22,7 +23,7 @@ proc buildaxon() {
     }
 }
 
-buildaxon(21)
+buildaxon(7)
 
 // Extracellular Potential Calculations-------------------------
 
@@ -53,18 +54,14 @@ for i=0, nnode-1{
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -.03 //mA
-DUR = .2
+AMP = -2.8 //mA
+DUR = .45
 DEL = 4
 //dt = 0.025
 tstop = 20
 
 // set electrode pos
 rho = 500 //Ohm cm //ex_resistivity
-
-XE = 1410  // µm
-YE = 100  // µm
-ZE = 0    // µm //Define electrode position
 
 // end set electrode stim *****
 
@@ -73,14 +70,13 @@ create dummy
 dummy dummystim = new IClamp(0.5)	// 0.5 is the normalized location
 dummystim.del = DEL
 dummystim.dur = DUR
-dummystim.amp = AMP
 
 // extracellular potentials
-objref phi_e, phi_ex, vm20, APfile, VmMatrix, rmat,mobj
+objref phi_e, phi_ex, vm, APfile, VmMatrix, rmat, mobj, vecCurrent
 VmMatrix = new Matrix(NROW,tstop/dt+1)
 
 APfile=new File()
-APfile.wopen("VmU_Node20_Matrix1.txt")
+APfile.wopen("VmU_Matrix1.txt")
 
 rmat = new Matrix(NROW,NCOL)
 phi_e = new Vector(nnode,0)
@@ -96,8 +92,10 @@ proc potential_field(){
     }
 }
 
-vm20 = new Vector(tstop/dt,0)
-vm20.record(&axon.v(1))
+vm = new Vector(tstop/dt,0)
+vm.record(&axon.v(1))
+vecCurrent = new Vector(tstop/dt,0)
+vecCurrent.record(&dummystim.i)
 
 // time integrate with constant time step size
 proc stimulate(){
@@ -107,12 +105,22 @@ proc stimulate(){
         t = 0
         finitialize(vinit)
         while (t<tstop) {
+            if (t >= DEL){
+                if (t-DEL < (DUR-.05)/2){
+                    dummystim.amp = AMP
+                }else if (t-DEL <= (DUR+.05)/2){
+                    dummystim.amp = 0
+                }else if (t-DEL > (DUR+.05)/2 && t-DEL <= DUR) {
+                    dummystim.amp = -AMP
+                }
+            }
+            
             potential_field(numrow)
             fadvance()
         }
         
         // for recording membrane potentials
-        VmMatrix.setrow(numrow, vm20)
+        VmMatrix.setrow(numrow, vm)
         
     }
     
@@ -129,14 +137,14 @@ APfile.close()
 objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
-//vm[10].plot(g,dt)
-vm20.plot(g,dt,2,1)
+vecCurrent.plot(g,dt)
+vm.plot(g,dt,2,1)
 // Matt's Plot *******
 
 // Extracellular potential vs distance at one time point
 objref vec, g2
 g2 = new Graph()
-g2.size(0, 2680, -70,10)
+g2.size(0, L, -70,10)
 vec = phi_ex
 vec.plot(g2, pos_nx, 3,2)
 

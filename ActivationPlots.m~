@@ -3,7 +3,9 @@
 
 clear; clc;
 thresh =0; %mV
-currvals = [-0.03]; %mA
+%currvals = abs([-0.28,-.3,-.2,-.1,-.15,-.17,-.16,-.18,-.19,-.22,0,-.24,...
+%    -.26,-.32,-.34,-.36,-.4,-.45,-.55,-.75,-1,-1.2,-1.5,-2,-2.2,-2.5,-3.2,-3.5,-4,-4.5]); %mA
+currvals = abs(dlmread('LogSpace.txt', ' '))
 DataLoc = '~/Documents/BME\ 504/Cochlea';
 %cd(DataLoc)
 APmycheck = 0;
@@ -11,34 +13,45 @@ APuncheck = 0;
 
 % Myl File Loop
 
-myfilelist=dir('VmM_Matrix*');
-for mycount = 1:length(myfilelist);
-eval(['load ' myfilelist(mycount).name ' -ascii']);
-eval(['DataM = VmM_Matrix' num2str(mycount) ';']);
-
-    for fiber = 1: 100
-        vm = DataM(fiber, :);
+myfilelist=dir('VmM_MatrixX*.txt');
+num_myfibers_AP = zeros(length(myfilelist),1);
+for mycount = 1:length(myfilelist); 
+    eval(['load ' myfilelist(mycount).name ' -ascii']);
+    if mycount < 10
+        eval(['DataM = VmM_MatrixX0' num2str(mycount) ';']);
+    else
+        eval(['DataM = VmM_MatrixX' num2str(mycount) ';']);
+    end
+    ROW = size(DataM,1);
+    for fiber = 1:ROW
+        vm = DataM(fiber, 190:end);
         VmMax = max(vm);
-            if VmMax >  thresh
+            if VmMax > thresh
                 APmycheck(fiber, mycount) = 1;
             else
                 APmycheck(fiber, mycount) = 0;
             end
     end
-    num_myfibers_AP(mycount,1) = sum(APmycheck)
+    num_myfibers_AP(mycount) = sum(APmycheck(:,mycount));
 end
 
 
 
-clearvars vm Data VmMax
+clearvars vm Data VmMax ROW
 
-unfilelist = dir('VmU_Matrix*');
+unfilelist = dir('VmU_MatrixX*.txt');
+num_unfiber_AP = zeros(length(myfilelist),1);
 for uncount = 1:length(unfilelist)
 eval(['load ' unfilelist(uncount).name ' -ascii']);
-eval(['DataU = VmU_Matrix' num2str(uncount) ';']);
-
-    for fiber = 1: 100
-        vm = DataU(fiber, :);
+    if uncount < 10
+        eval(['DataU = VmU_MatrixX0' num2str(uncount) ';']);
+    else
+        eval(['DataU = VmU_MatrixX' num2str(uncount) ';']);
+    end
+    
+    ROW = size(DataU,1);
+    for fiber = 1:ROW;
+        vm = DataU(fiber, 181:end);
         VmMax = max(vm);
             if VmMax >  thresh
                 APuncheck(fiber, uncount) = 1;
@@ -46,7 +59,7 @@ eval(['DataU = VmU_Matrix' num2str(uncount) ';']);
                 APuncheck(fiber, uncount) = 0;
             end
     end
-   num_unfiber_AP(uncount,1) = sum(APuncheck)
+   num_unfiber_AP(uncount) = sum(APuncheck(:,uncount));
 end
 
 %num_total_AP = num_unfiber_AP(:)+num_myfiber_AP(:);
@@ -57,9 +70,9 @@ end
 
 % Plot
 
-p = polyfit(currvals,num_total_APfibers_AP,4);
-fit = polyval(p, linspace(0, 0.35));
+p = polyfit(currvals,num_total_AP,4);
+fit = polyval(p, linspace(0,1));
 
 figure(1); clf
 title('Activation % vs. Cathodic Stimulus Amplitude'); xlabel('Cathodic Stimulus Amplitude'); ylabel('Activation Percentage');
-plot(currvals, num_total_AP, 'ro', linspace(0,0.15),fit,'b-')
+semilogx(currvals, num_total_AP, 'ro', linspace(0,1),fit,'b-')

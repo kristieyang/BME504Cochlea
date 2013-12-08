@@ -56,7 +56,7 @@ make(7)
 
 // read data file---------------------------------------
 objref rdistfile, rdistmat
-NROW = 100
+NROW = 950
 NCOL = nnode
 rdistfile = new File("rdistm.txt")
 rdistmat = new Matrix()
@@ -82,8 +82,9 @@ for i=0, nnode-1{
 //dummy stimulus only to control waveform parameters
 //The 'dummy' section has nothing to do with the fiber
 
+
 // set electrode stim *******************************************
-AMP = -.28 //mA
+AMP = -0.03
 DUR = .45
 DEL = 4
 tstop = 20
@@ -104,11 +105,11 @@ dummystim.dur = DUR
 
 // extracellular potentials
 objref phi_e, phi_ex, vm, APfile, VmMatrix, rmat, mobj, vecCurrent
+
 VmMatrix = new Matrix(NROW,tstop/dt+1)
-
 APfile=new File()
-APfile.wopen("VmM_Matrix1.txt")
-
+APfile.wopen("
+             "Vm_Test.txt")
 
 rmat = new Matrix(NROW,NCOL)
 phi_e = new Vector(nnode,0)
@@ -131,28 +132,28 @@ vecCurrent.record(&dummystim.i)
 // time integrate with constant time step size (intrinsic dt)----
 proc stimulate(){
 	finitialize(vinit)
-	for numrow = 0, NROW-1 {
-        t = 0
-        finitialize(vinit)
-        while (t<tstop) {
-            if (t >= DEL){
-                if (t-DEL < (DUR-.05)/2){
-                    dummystim.amp = AMP
-                }else if (t-DEL <= (DUR+.05)/2){
-                    dummystim.amp = 0
-                }else if (t-DEL > (DUR+.05)/2 && t-DEL <= DUR) {
-                    dummystim.amp = -AMP
+
+        for numrow = 0, NROW-1 {
+            t = 0
+            finitialize(vinit)
+            while (t<tstop) {
+                if (t >= DEL){
+                    if (t-DEL < (DUR-.05)/2){
+                        dummystim.amp = AMP
+                    }else if (t-DEL <= (DUR+.05)/2){
+                        dummystim.amp = 0
+                    }else if (t-DEL > (DUR+.05)/2 && t-DEL <= DUR) {
+                        dummystim.amp = -AMP
+                    }
                 }
+                potential_field(numrow)
+                fadvance()
             }
-
-            potential_field(numrow)
-            fadvance()
+            // for recording membrane potentials
+            VmMatrix.setrow(numrow, vm)
         }
-
-    // for recording membrane potentials
-    VmMatrix.setrow(numrow, vm)
-        
-    }
+        VmMatrix.fprint(0,APfile)
+        APfile.close()
 
 }
 
@@ -161,8 +162,8 @@ proc stimulate(){
 // Run stimulation through time----------------------------------
 
 stimulate()
-VmMatrix.fprint(0,APfile)
-APfile.close()
+
+
 
 // *****************************PLOTTING************************************
 
@@ -202,7 +203,7 @@ g4.size(rvp.left(),rvp.right(),-90,50)
 
 
 // Spatial Plots at Multiple Time Points----------------------------------
-
+/*
 objref pos_vec, rvp2, vspace_mat, vspace_vec, f
 
 proc spatialplots(){
@@ -234,6 +235,7 @@ proc spatialplots(){
 }
 
 spatialplots()
+*/
 snapshot()
 
 // End Spatial Plots------------------------------------------------------

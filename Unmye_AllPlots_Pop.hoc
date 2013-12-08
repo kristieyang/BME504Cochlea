@@ -29,7 +29,7 @@ buildaxon(7)
 
 // read data file---------------------------------------
 objref rdistfile, rdistmat
-NROW = 100
+NROW = 50
 NCOL = nnode
 rdistfile = new File("rdistu.txt")
 rdistmat = new Matrix()
@@ -47,14 +47,14 @@ pos_ny = new Vector(nnode,0)
 pos_nz = new Vector(nnode,0)
 
 for i=0, nnode-1{
-    pos_nx.set(i, i*141) // position vector of all the nodes
+    pos_nx.set(i, 1*(i+1)+i*150) // position vector of all the nodes
 }
 
 //dummy stimulus only to control waveform parameters
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -2.8 //mA
+AMP = -4.5   //mA
 DUR = .45
 DEL = 4
 //dt = 0.025
@@ -76,7 +76,7 @@ objref phi_e, phi_ex, vm, APfile, VmMatrix, rmat, mobj, vecCurrent
 VmMatrix = new Matrix(NROW,tstop/dt+1)
 
 APfile=new File()
-APfile.wopen("VmU_Matrix1.txt")
+APfile.wopen("VmU_MatrixX01.txt")
 
 rmat = new Matrix(NROW,NCOL)
 phi_e = new Vector(nnode,0)

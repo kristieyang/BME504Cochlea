@@ -3,6 +3,7 @@ load_proc("nrnmainmenu")
 
 create axon
 vinit = -65        //initial potential
+D = 1.5 //µm
 
 // initialize axon
 proc buildaxon() {

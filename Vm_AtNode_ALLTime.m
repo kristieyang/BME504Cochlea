@@ -4,7 +4,7 @@ clear;clf
 
 C = textread('Vm_AtONENode_OverALLTime.txt');
 mat_size = size(C);
-space = linspace(0,2680,mat_size(2)-1);
+space = linspace(0,3021,mat_size(2)-1);
 
 figure(1)
 clf

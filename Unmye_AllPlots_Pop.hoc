@@ -31,7 +31,7 @@ buildaxon(7)
 objref rdistfile, rdistmat
 NROW = 100
 NCOL = nnode
-rdistfile = new File("rdist.txt")
+rdistfile = new File("rdistu.txt")
 rdistmat = new Matrix()
 rdistfile.ropen()
 o = rdistmat.scanf(rdistfile,NROW,NCOL)

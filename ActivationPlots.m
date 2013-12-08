@@ -11,10 +11,10 @@ APuncheck = 0;
 
 % Myl File Loop
 
-myfilelist=dir('Vm_Node20_MatrixM*');
+myfilelist=dir('VmM_Node20_Matrix*');
 for mycount = 1:length(myfilelist);
 eval(['load ' myfilelist(mycount).name ' -ascii']);
-eval(['DataM = Vm_Node20_MatrixM' num2str(mycount) ';']);
+eval(['DataM = VmM_Node20_Matrix' num2str(mycount) ';']);
 
     for fiber = 1: 100
         vm = Data(fiber, :);
@@ -32,10 +32,10 @@ end
 
 clearvars vm Data VmMax
 
-unfilelist = dir('Vm_Node20_MatrixU*');
+unfilelist = dir('VmU_Node20_Matrix*');
 for uncount = 1:length(unfilelist)
 eval(['load ' unfilelist(uncount).name ' -ascii']);
-eval(['DataM = Vm_Node20_MatrixM' num2str(uncount) ';']);
+eval(['DataU = VmU_Node20_Matrix' num2str(uncount) ';']);
 
     for fiber = 1: 100
         vm = Data(fiber, :);

@@ -4,7 +4,7 @@ load_proc("nrnmainmenu")
 create node[1]
 objref nodes
 vinit = -65        //initial potential
-INL = 100*1.4        // internodal length µm
+INL = 100*1.5        // internodal length µm
 
 // initialize axon-----------------------------------------------
 proc buildaxon() {local k
@@ -21,7 +21,7 @@ proc buildaxon() {local k
 // axon physical properties--------------------------------------
 proc physprop(){
     forsec nodes{
-        D = 25 //µm
+        D = 1.5 //µm
         diam = 0.7*D //µm
         L = 1 // nodal length in µm
         nseg = 1
@@ -49,7 +49,7 @@ proc make(){
     membprop()
 }
 
-make(21)
+make(7)
 
 // Extracellular Potential Calculations-------------------------
 
@@ -85,15 +85,11 @@ for i=0, nnode-1{
 AMP = -.03 //mA
 DUR = .2
 DEL = 4
-//dt = 0.025
 tstop = 20
 
 // set electrode pos --------------------------------------------
 rho = 500 //Ohm cm //ex_resistivity
 
-     XE = 1410  // µm
-     YE = 100  // µm
-     ZE = 0  // µm
 
 // end set electrode stim ---------------------------------------
 
@@ -126,7 +122,7 @@ proc potential_field(){
 }
 
 vm20 = new Vector(tstop/dt,0)
-vm20.record(&node[20].v(0.5))
+vm20.record(&node[5].v(0.5))
 
 
 // time integrate with constant time step size (intrinsic dt)----
@@ -169,7 +165,7 @@ vm20.plot(g,dt,2,1)
 // Extracellular potential vs distance at some time during Stimulation----
 objref vec, g2
 g2 = new Graph()
-g2.size(0, 2680, -70,10)
+g2.size(0, L*(nnode)+(nnode-1)*INL, -70,10)
 vec = phi_ex
 vec.plot(g2, pos_nx, 3,2)
 
@@ -183,7 +179,7 @@ tstop = DEL+DUR
 stimulate()
 rvp = new RangeVarPlot("v")
 node[0] rvp.begin(0)
-node[20] rvp.end(1)
+node[nnode-1] rvp.end(1)
 
 g4 = new Graph()
 g4.addobject(rvp)
@@ -209,7 +205,7 @@ proc spatialplots(){
         
         rvp2 = new RangeVarPlot("v")
         node[0] rvp2.begin(0)
-        node[20] rvp2.end(1)
+        node[nnode-1] rvp2.end(1)
         
         rvp2.to_vector(vspace_vec)
         vspace_mat.setrow(count,vspace_vec)

@@ -13,8 +13,8 @@ proc buildaxon() {
         diam = 0.7*D //µm
         L = 907 //µm
         //Rm = 1000
-        Ra = 100// axial resistivity (ohm-cm)
-        cm = 2
+        Ra = 50// axial resistivity (ohm-cm)
+        cm = 1
         //insert pas
         //e_pas=-65
         insert hh
@@ -26,7 +26,7 @@ proc buildaxon() {
         nseg=1
         diam=25
         L=25
-        Ra=150
+        Ra=50
         cm=1
         //insert pas
         //e_pas = -65
@@ -69,7 +69,7 @@ for i=0, nnode-1{
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -3.1   //mA
+AMP = -1.1   //mA
 DUR = .45
 DEL = 4
 //dt = 0.025

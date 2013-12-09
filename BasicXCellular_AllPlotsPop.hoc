@@ -22,7 +22,7 @@ proc buildaxon() {local k
         nseg=1
         diam=25
         L=25
-        Ra=100
+        Ra=50
         cm=1
         //insert pas
         //e_pas = -65
@@ -50,10 +50,9 @@ proc membprop(){
     forsec nodes{
         insert hh
         insert extracellular
-        Rm = 1000
-        rhoa = 100      // axial resistivity (ohm-cm)
+        rhoa = 50      // axial resistivity (ohm-cm)
         Ra = rhoa*((INL+L)/L)
-        cm = 2
+        cm = 1
     }
     
 }
@@ -99,7 +98,7 @@ for i=0, nnode-1{
 
 
 // set electrode stim *******************************************
-AMP = -0.4
+AMP = -0.6
 DUR = .45
 DEL = 4
 tstop = 20
@@ -205,12 +204,12 @@ vec.plot(g2, pos_nx, 3,2)
 objref rvp, g4
 proc snapshot(){
 
-tstop = DEL+DUR
+tstop = DEL+(DUR-.05)/2
 
 stimulate()
 rvp = new RangeVarPlot("v")
 node[0] rvp.begin(0)
-node[nnode-1] rvp.end(1)
+soma rvp.end(1)
 
 g4 = new Graph()
 g4.addobject(rvp)
@@ -252,7 +251,7 @@ proc spatialplots(){
     
 }
 
-spatialplots()
+//spatialplots()
 
 snapshot()
 

@@ -68,7 +68,7 @@ proc make(){
     membprop()
 }
 
-make(7)
+make(101)
 
 // Extracellular Potential Calculations-------------------------
 
@@ -99,7 +99,7 @@ for i=0, nnode-1{
 
 // set electrode stim *******************************************
 
-AMP = -.135 //mA
+AMP = -.155 //mA
 DUR = .45
 DEL = 4
 tstop = 20
@@ -175,9 +175,9 @@ objref CVfile, CVmat
 CVfile=new File()
 CVmat = new Matrix(3,tstop/dt+1)
 CVmat.setrow(0,vecCurrent)
-CVmat.setrow(1,vm[0])
+CVmat.setrow(1,vm[nnode-11])
 CVmat.setrow(2,vm[nnode-1])
-CVfile.wopen("CVfileMYE_4.txt")
+CVfile.wopen("CVfileMYE_5.txt")
 CVmat.fprint(0,CVfile)
 CVfile.close()
 
@@ -185,13 +185,14 @@ objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
 vm[0].plot(g,dt)
+vm[nnode-10].plot(g,dt,3,2)
 vm[nnode-1].plot(g,dt,2,1)
 vecCurrent.plot(g,dt,3,1)
 
 // Extracellular potential vs distance at some time during Stimulation----
 objref vec, g2
 g2 = new Graph()
-g2.size(0, 907, -70,10)
+g2.size(0, L*(nnode)+(nnode-1)*INL, -70,10)
 vec = phi_ex
 vec.plot(g2, pos_nx, 3,2)
 
@@ -220,7 +221,7 @@ objref pos_vec, rvp2, vspace_mat, vspace_vec, f
 proc spatialplots(){
     // show how node changes over time
     
-    vspace_mat = new Matrix(9,79)
+    vspace_mat = new Matrix(9,199)
     vspace_vec = new Vector(9)
     counter = 0
     for(k = DEL/dt; k < (DEL+DUR+9)/dt-1; k = k + 50) {

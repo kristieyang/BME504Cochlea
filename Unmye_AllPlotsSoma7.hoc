@@ -12,7 +12,7 @@ proc buildaxon() {
         nseg=nnode
         diam = 0.7*D //µm
         print diam
-        L =  907//µm
+        L =  1*(nnode)+(nnode-1)*150//µm
         //Rm = 1000
         Ra = 110// axial resistivity (ohm-cm)
         cm = 1
@@ -41,7 +41,7 @@ proc buildaxon() {
 
 }
 
-buildaxon(7)
+buildaxon(21)
 
 
 //for keeping track of node positions and Ve at nodes
@@ -68,7 +68,7 @@ for i=0, nnode-1 {
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -.75 //mA
+AMP = -.85 //mA
 DUR = .45
 DEL = 4
 tstop = 20
@@ -133,9 +133,9 @@ objref CVfile, CVmat
 CVfile=new File()
 CVmat = new Matrix(3,tstop/dt+1)
 CVmat.setrow(0,vecCurrent)
-CVmat.setrow(1,vm[0])
+CVmat.setrow(1,vm[nnode-11])
 CVmat.setrow(2,vm[nnode-1])
-CVfile.wopen("CVfileUN_4.txt")
+CVfile.wopen("CVfileUN_5.txt")
 CVmat.fprint(0,CVfile)
 CVfile.close()
 

@@ -21,7 +21,7 @@ proc buildaxon() {local k
         nseg=1
         diam=25
         L=25
-        Ra=150
+        Ra=100
         cm=1
         //insert pas
         //e_pas = -65
@@ -30,7 +30,7 @@ proc buildaxon() {local k
         define_shape()
         
     }
-    connect soma(1), node[0](1)
+    connect soma(1), node[0](0)
     finitialize(vinit)
 }
 
@@ -97,8 +97,8 @@ vm_s.record(&soma.v(0.5))
 
 // set electrode stim *******************************************
 
-AMP = -.025 //mA
-DUR = .2
+AMP = -.035 //mA
+DUR = .45
 DEL = 4
 //dt = 0.025
 tstop = 20
@@ -106,7 +106,7 @@ tstop = 20
 // set electrode pos --------------------------------------------
 rho = 500 //Ohm cm //ex_resistivity
 
-     XE = 1535  // µm
+     XE = 2290 // µm
      YE = 100  // µm
      ZE = 0  // µm
 
@@ -117,10 +117,11 @@ create dummy
 dummy dummystim = new IClamp(0.5)	// 0.5 is the normalized location
 dummystim.del = DEL
 dummystim.dur = DUR
-dummystim.amp = AMP
+
+
 
 // extracellular potentials
-objref phi_e, phi_ex
+objref phi_e, phi_ex, vecCurrent
 phi_e = new Vector(nnode,0)
 phi_ex = new Vector(nnode,0)
 proc potential_field(){
@@ -133,29 +134,26 @@ proc potential_field(){
     soma.e_extracellular(0.5) = phi_e.x[0]
 }
 
+vecCurrent = new Vector(tstop/dt,0)
+vecCurrent.record(&dummystim.i)
+
+
 // time integrate with constant time step size (intrinsic dt)----
 proc stimulate(){
 	finitialize(vinit)
 	while (t<tstop) {	
-		potential_field()
-	  fadvance()
+		if (t >= DEL){
+            if (t-DEL < (DUR-.05)/2){
+                dummystim.amp = AMP
+            }else if (t-DEL <= (DUR+.05)/2){
+                dummystim.amp = 0
+            }else if (t-DEL > (DUR+.05)/2 && t-DEL <= DUR) {
+                dummystim.amp = -AMP
+            }
+        }
+        potential_field()
+	    fadvance()
 	}
-    /*
-	t = 0
-    SetElectrodeToFiber(705,100,0) //*****SET XYZ in um*********************
-	finitialize(vinit)
-	while (t<tstop) {
-		potential_field()
-        fadvance()
-    }
-    t = 0
-    SetElectrodeToFiber(0,100,0) //*****SET XYZ in um*********************
-	finitialize(vinit)
-	while (t<tstop) {
-		potential_field()
-        fadvance()
-    }
-     */
 }
 
 
@@ -171,17 +169,29 @@ stimulate()
 
 // Membrane Voltage plot over Time for Nodes 10 and 15--------------------
 
+
+objref CVfile, CVmat
+CVfile=new File()
+CVmat = new Matrix(3,tstop/dt+1)
+CVmat.setrow(0,vecCurrent)
+CVmat.setrow(1,vm[14])
+CVmat.setrow(2,vm[10])
+CVfile.wopen("CVfileMYE.txt")
+CVmat.fprint(0,CVfile)
+CVfile.close()
+
 objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
-vm[10].plot(g,dt)
+vm[14].plot(g,dt)
 vm_s.plot(g,dt,2,2)
-vm[1].plot(g,dt,2,1)
+vecCurrent.plot(g,dt,3,1)
+vm[10].plot(g,dt,2,1)
 
 // Extracellular potential vs distance at some time during Stimulation----
 objref vec, g2
 g2 = new Graph()
-g2.size(0, 2680, -70,10)
+g2.size(0, 3021, -70,10)
 vec = phi_ex
 vec.plot(g2, pos_nx, 3,2)
 
@@ -189,11 +199,11 @@ vec.plot(g2, pos_nx, 3,2)
 objref rvp, g4
 proc snapshot(){
 
-tstop = DEL+DUR
+tstop = DEL+(DUR-.05)/2
 
 stimulate()
 rvp = new RangeVarPlot("v")
-node[0] rvp.begin(0)
+soma rvp.begin(0)
 node[20] rvp.end(1)
 
 g4 = new Graph()
@@ -218,7 +228,7 @@ proc spatialplots(){
         stimulate()
         
         rvp2 = new RangeVarPlot("v")
-        node[0] rvp2.begin(0)
+        soma rvp2.begin(0)
         node[20] rvp2.end(1)
         
         rvp2.to_vector(vspace_vec)

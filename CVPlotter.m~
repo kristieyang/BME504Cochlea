@@ -1,0 +1,47 @@
+%% BME 504 CV Plots
+%% DN, KY, MN
+
+Mye = dlmread('CVfileMYE.txt');
+StimM = Mye(1,:);
+N14M = Mye(2,:);
+N10M = Mye(3,:);
+Un = dlmread('CVfileUN.txt');
+StimU = Un(1,:);
+N14U = Un(2,:);
+N10U = Un(3,:);
+
+t = linspace(0,20,801);
+
+figure(1), clf
+subplot(2,1,1)
+[AX_M,H1_M,H2_M] = plotyy(t, N14M, t,StimM);
+hold on
+plot(t,N10M,'r')
+hold off
+set(get(AX_M(1),'Ylabel'),'String','Vm (mV)') 
+set(get(AX_M(2),'Ylabel'),'String','Stimulus Current (mA)') 
+set(H1_M,'color','k')
+set(gca,'YTick', -100:20:100);
+set(AX_M(2),'YTick', -0.05:0.02:0.05);
+set(H2_M,'color','b')
+set(AX_M,{'ycolor'},{'k';'k'})
+set(H2_M,'LineWidth',1.5)
+title('Myelinated Axon, Conduction Velocity')
+xlabel('Time (ms)')
+
+subplot(2,1,2)
+[AX_U,H1_U,H2_U] = plotyy(t, N14U, t, StimU);
+hold on
+plot(t,N10U,'r')
+hold off
+set(get(AX_U(1),'Ylabel'),'String','Vm (mV)') 
+set(get(AX_U(2),'Ylabel'),'String','Stimulus Current (mA)') 
+set(H1_U,'color','k')
+set(gca,'YTick', -100:20:100);
+set(AX_U(2),'YTick', -0.01:0.02:0.05);
+set(H2_U,'color','b')
+set(AX_U,{'ycolor'},{'k';'k'})
+set(H2_U,'LineWidth',1.5)
+title('Unmyelinated Axon, Conduction Velocity')
+xlabel('Time (ms)')
+legend('Node 14','Node 10','Stimulus Pulse',0)

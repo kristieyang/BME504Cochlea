@@ -18,5 +18,5 @@ for i=2:mat_size(1)-1
     title(str{i})
     xlabel('Length of Peripheral Process, µm')
     ylabel('Vm, mV')
-    axis([0 2680 min(min(C(2:end,:))) max(max(C(2:end,:)))])
+    axis([0 3021 min(min(C(2:end,:))) max(max(C(2:end,:)))])
 end

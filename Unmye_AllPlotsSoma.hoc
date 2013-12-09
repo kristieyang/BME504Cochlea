@@ -27,7 +27,7 @@ proc buildaxon() {
         nseg=1
         diam=25
         L=25
-        Ra=150
+        Ra=50
         cm=1
         //insert pas
         //e_pas = -65

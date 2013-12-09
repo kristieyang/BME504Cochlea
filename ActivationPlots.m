@@ -13,14 +13,14 @@ APuncheck = 0;
 
 % Myl File Loop
 
-myfilelist=dir('VmM_Matrix25T*.txt');
+myfilelist=dir('VmM_Matrix50T*.txt');
 num_myfibers_AP = zeros(length(myfilelist),1);
 for mycount = 1:length(myfilelist); 
     eval(['load ' myfilelist(mycount).name ' -ascii']);
     if mycount < 10
-        eval(['DataM = VmM_Matrix25T0' num2str(mycount) ';']);
+        eval(['DataM = VmM_Matrix50T0' num2str(mycount) ';']);
     else
-        eval(['DataM = VmM_Matrix25T' num2str(mycount) ';']);
+        eval(['DataM = VmM_Matrix50T' num2str(mycount) ';']);
     end
     ROW = size(DataM,1);
     for fiber = 1:ROW
@@ -39,14 +39,14 @@ end
 
 clearvars vm Data VmMax ROW
 
-unfilelist = dir('VmU_Matrix25T*.txt');
+unfilelist = dir('VmU_Matrix50T*.txt');
 num_unfiber_AP = zeros(length(myfilelist),1);
 for uncount = 1:length(unfilelist)
 eval(['load ' unfilelist(uncount).name ' -ascii']);
     if uncount < 10
-        eval(['DataU = VmU_Matrix25T0' num2str(uncount) ';']);
+        eval(['DataU = VmU_Matrix50T0' num2str(uncount) ';']);
     else
-        eval(['DataU = VmU_Matrix25T' num2str(uncount) ';']);
+        eval(['DataU = VmU_Matrix50T' num2str(uncount) ';']);
     end
     
     ROW = size(DataU,1);

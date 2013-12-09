@@ -146,9 +146,9 @@ proc stimulate(){
 		if (t >= DEL){
             if (t-DEL < (DUR-.05)/2){
                 dummystim.amp = AMP
-            }else if (t-DEL <= (DUR+.05)/2){
+            }else if (t-DEL < (DUR+.05)/2){
                 dummystim.amp = 0
-            }else if (t-DEL > (DUR+.05)/2 && t-DEL <= DUR) {
+            }else if (t-DEL >= (DUR+.05)/2 && t-DEL <= DUR) {
                 dummystim.amp = -AMP
             }
         }

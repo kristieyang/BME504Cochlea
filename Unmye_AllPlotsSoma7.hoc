@@ -68,7 +68,7 @@ for i=0, nnode-1 {
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -.85 //mA
+AMP = -.9 //mA
 DUR = .45
 DEL = 4
 tstop = 20
@@ -115,9 +115,9 @@ proc stimulate(){
 		if (t >= DEL){
             if (t-DEL < (DUR-.05)/2){
                 dummystim.amp = AMP
-            }else if (t-DEL <= (DUR+.05)/2){
+            }else if (t-DEL < (DUR+.05)/2){
                 dummystim.amp = 0
-            }else if (t-DEL > (DUR+.05)/2 && t-DEL <= DUR) {
+            }else if (t-DEL >= (DUR+.05)/2 && t-DEL <= DUR) {
                 dummystim.amp = -AMP
             }
         }

@@ -72,9 +72,9 @@ make(7)
 
 // read data file---------------------------------------
 objref rdistfile, rdistmat
-NROW = 950
+NROW = 428
 NCOL = nnode
-rdistfile = new File("rdistm.txt")
+rdistfile = new File("rdistm_degen25.txt")
 rdistmat = new Matrix()
 rdistfile.ropen()
 o = rdistmat.scanf(rdistfile,NROW,NCOL)
@@ -162,9 +162,9 @@ proc stimulate(){
     for count = 1, stimLEN {
         AMP = stimAMP.get(count-1) //mA
         if (count < 10) {
-            sprint(filename,"%s%0.0f%s","VmM_MatrixT0",count,".txt")
+            sprint(filename,"%s%0.0f%s","VmM_Matrix25T0",count,".txt")
         }else{
-            sprint(filename,"%s%0.0f%s","VmM_MatrixT",count,".txt")
+            sprint(filename,"%s%0.0f%s","VmM_Matrix25T",count,".txt")
         }
         APfile=new File()
         APfile.wopen(filename)

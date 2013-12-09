@@ -35,7 +35,7 @@ proc buildaxon() {local k
     finitialize(vinit)
 }
 
-
+//
 // axon physical properties--------------------------------------
 proc physprop(){
     forsec nodes{

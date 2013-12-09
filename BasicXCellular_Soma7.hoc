@@ -68,7 +68,7 @@ proc make(){
     membprop()
 }
 
-make(101)
+make(21)
 
 // Extracellular Potential Calculations-------------------------
 
@@ -99,7 +99,7 @@ for i=0, nnode-1{
 
 // set electrode stim *******************************************
 
-AMP = -.17 //mA
+AMP = -.003 //mA
 DUR = .45
 DEL = 4
 tstop = 20
@@ -107,8 +107,8 @@ tstop = 20
 // set electrode pos --------------------------------------------
 rho = 500 //Ohm cm //ex_resistivity
 
-     XE = -500 // µm
-     YE = 0  // µm
+     XE = 1510 // µm
+     YE = 10  // µm
      ZE = 0  // µm
 
 // end set electrode stim ---------------------------------------
@@ -170,7 +170,7 @@ stimulate()
 
 // Membrane Voltage plot over Time for Nodes 10 and 15--------------------
 
-
+/*
 objref CVfile, CVmat
 CVfile=new File()
 CVmat = new Matrix(3,tstop/dt+1)
@@ -180,13 +180,14 @@ CVmat.setrow(2,vm[nnode-1])
 CVfile.wopen("CVfileMYE_5.txt")
 CVmat.fprint(0,CVfile)
 CVfile.close()
+*/
 
 objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
 vm[0].plot(g,dt)
-vm[nnode-10].plot(g,dt,3,2)
-vm[nnode-1].plot(g,dt,2,1)
+//vm[nnode-10].plot(g,dt,3,2)
+//vm[nnode-1].plot(g,dt,2,1)
 vecCurrent.plot(g,dt,3,1)
 
 // Extracellular potential vs distance at some time during Stimulation----

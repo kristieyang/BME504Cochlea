@@ -68,7 +68,7 @@ for i=0, nnode-1 {
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -.9 //mA
+AMP = -0.004 //mA
 DUR = .45
 DEL = 4
 tstop = 20
@@ -76,8 +76,8 @@ tstop = 20
 // set electrode pos
 rho = 500 //Ohm cm //ex_resistivity
 
-XE = -500  // µm
-YE = 0  // µm
+XE = 1510  // µm
+YE = 10  // µm
 ZE = 0    // µm //Define electrode position
 
 // end set electrode stim *****
@@ -144,7 +144,7 @@ g = new Graph()
 g.size(0,tstop,vinit-10,70)
 vm[0].plot(g,dt)
 vecCurrent.plot(g,dt,3,1)
-vm[nnode-1].plot(g,dt,2,1)
+//vm[nnode-1].plot(g,dt,2,1)
 // Matt's Plot *******
 
 // Extracellular potential vs distance at one time point

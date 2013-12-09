@@ -173,7 +173,7 @@ CVfile=new File()
 CVmat = new Matrix(3,tstop/dt+1)
 CVmat.setrow(0,vecCurrent)
 CVmat.setrow(1,vm[10])
-CVmat.setrow(2,vm[9])
+CVmat.setrow(2,vm[7])
 CVfile.wopen("CVfileMYE_2.txt")
 CVmat.fprint(0,CVfile)
 CVfile.close()
@@ -184,7 +184,7 @@ g.size(0,tstop,vinit-10,70)
 vm[10].plot(g,dt)
 vm_s.plot(g,dt,2,2)
 vecCurrent.plot(g,dt,3,1)
-vm[9].plot(g,dt,2,1)
+vm[7].plot(g,dt,2,1)
 
 // Extracellular potential vs distance at some time during Stimulation----
 objref vec, g2

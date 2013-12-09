@@ -110,7 +110,7 @@ proc potential_field(){
 }
 
 vm = new Vector(tstop/dt,0)
-vm.record(&axon.v(1))
+vm.record(&axon.v(0))
 vm_s = new Vector(tstop/dt,0)
 vm_s.record(&soma.v(0.5))
 
@@ -140,7 +140,7 @@ proc stimulate(){
         }
         
         // for recording membrane potentials
-        VmMatrix.setrow(numrow, vm)
+        VmMatrix.setrow(numrow, vm_s)
         
     }
     

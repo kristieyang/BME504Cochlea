@@ -15,7 +15,7 @@ proc buildaxon() {
         L =  7021//µm
         //Rm = 1000
         Ra = 100// axial resistivity (ohm-cm)
-        cm = 2
+        cm = 1
         //insert pas
         //e_pas=-65
         insert hh

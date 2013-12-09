@@ -54,7 +54,7 @@ proc membprop(){
         Rm = 1000
         rhoa = 100      // axial resistivity (ohm-cm)
         Ra = rhoa*((INL+L)/L)
-        cm = 2
+        cm = 1
     }
     
 }

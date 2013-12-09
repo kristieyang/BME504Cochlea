@@ -1,7 +1,7 @@
 load_file("nrngui.hoc")
 load_proc("nrnmainmenu")
 
-create axon, soma
+create axon//, soma
 vinit = -65        //initial potential
 D = 1.5 //µm
 
@@ -21,6 +21,7 @@ proc buildaxon() {
         insert extracellular
         define_shape()
     }
+    /*
     soma{
         nseg=1
         diam=25
@@ -35,6 +36,7 @@ proc buildaxon() {
         
     }
     connect soma(0), axon(1)
+     */
 }
 
 buildaxon(7)
@@ -113,14 +115,14 @@ proc potential_field(){
         axon.e_extracellular(pos) = phi_e.x[i]
         phi_ex.set(i,AMP * (rho / 4 / PI)*(1/r)*10^4)
     }
-    soma.e_extracellular(0.5) = phi_e.x[nnode-1]
+    //soma.e_extracellular(0.5) = phi_e.x[nnode-1]
 
 }
 
 vm = new Vector(tstop/dt,0)
 vm.record(&axon.v(1))
 vm_s = new Vector(tstop/dt,0)
-vm_s.record(&soma.v(0.5))
+//vm_s.record(&soma.v(0.5))
 vecCurrent = new Vector(tstop/dt,0)
 vecCurrent.record(&dummystim.i)
 
@@ -154,7 +156,7 @@ proc stimulate(){
                 fadvance()
             }
             // for recording membrane potentials
-            VmMatrix.setrow(numrow, vm_s)
+            VmMatrix.setrow(numrow, vm)
         }
         VmMatrix.fprint(0,APfile)
         APfile.close()
@@ -171,7 +173,7 @@ objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
 vecCurrent.plot(g,dt)
-vm_s.plot(g,dt,2,2)
+//vm_s.plot(g,dt,2,2)
 vm.plot(g,dt,2,1)
 // Matt's Plot *******
 

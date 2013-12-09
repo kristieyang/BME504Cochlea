@@ -1,7 +1,7 @@
 load_file("nrngui.hoc")
 load_proc("nrnmainmenu")
 
-create node[1],soma
+create node[1]//,soma
 objref nodes
 vinit = -65        //initial potential
 D = 1.5 //µm
@@ -18,6 +18,7 @@ proc buildaxon() {local k
         connect node[k+1](1),node[k](0)
     }
     // soma
+    /*
     soma{
         nseg=1
         diam=25
@@ -32,6 +33,7 @@ proc buildaxon() {local k
         
     }
     connect soma(0), node[nnode-1](0)
+     */
     finitialize(vinit)
 }
 // axon physical properties--------------------------------------
@@ -39,7 +41,7 @@ proc physprop(){
     forsec nodes{
         
         diam = 0.7*D //µm
-        L = 10 // nodal length in µm
+        L = 1 // nodal length in µm
         nseg = 1
         define_shape()
     }
@@ -143,14 +145,14 @@ proc potential_field(){
         node[i].e_extracellular(0.5) = phi_e.x[i]
         phi_ex.set(i,AMP * (rho / 4 / PI)*(1/r)*10^4)
     }
-    soma.e_extracellular(0.5) = phi_e.x[nnode-1]
+    //soma.e_extracellular(0.5) = phi_e.x[nnode-1]
 
 }
 
 vm = new Vector(tstop/dt,0)
 vm.record(&node[nnode-1].v(0.5))
 vm_s = new Vector(tstop/dt,0)
-vm_s.record(&soma.v(0.5))
+//vm_s.record(&soma.v(0.5))
 vecCurrent = new Vector(tstop/dt,0)
 vecCurrent.record(&dummystim.i)
 
@@ -206,7 +208,7 @@ objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
 vecCurrent.plot(g,dt)
-vm_s.plot(g,dt,2,2)
+//vm_s.plot(g,dt,2,2)
 vm.plot(g,dt,2,1)
 
 // Extracellular potential vs distance at some time during Stimulation----
@@ -227,7 +229,7 @@ proc snapshot(){
     //stimulate()
     rvp = new RangeVarPlot("v")
     node[0] rvp.begin(0)
-    soma rvp.end(1)
+    node[nnode] rvp.end(1)
     
     g4 = new Graph()
     g4.addobject(rvp)

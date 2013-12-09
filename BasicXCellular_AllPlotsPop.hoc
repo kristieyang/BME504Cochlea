@@ -86,7 +86,7 @@ pos_ny = new Vector(nnode,0)
 pos_nz = new Vector(nnode,0)
 
 for i=0, nnode-1{
-    pos_nx.set(i, 25+L*(i+1)+i*INL) // position vector of all the nodes
+    pos_nx.set(i, L*(i+1)+i*INL) // position vector of all the nodes
     //print L*(i+1)+i*INL
 }
 //pos_nx.mul(1e-3) //convert from um to mm
@@ -98,7 +98,7 @@ for i=0, nnode-1{
 
 
 // set electrode stim *******************************************
-AMP = -0.6
+AMP = -0.076
 DUR = .45
 DEL = 4
 tstop = 20
@@ -143,6 +143,7 @@ vm = new Vector(tstop/dt,0)
 vm.record(&node[0].v(0.5))
 vm_s = new Vector(tstop/dt,0)
 vm_s.record(&soma.v(0.5))
+
 vecCurrent = new Vector(tstop/dt,0)
 vecCurrent.record(&dummystim.i)
 

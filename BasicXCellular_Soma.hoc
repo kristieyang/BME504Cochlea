@@ -25,7 +25,7 @@ proc buildaxon() {local k
         Ra=50
         cm=1
         //insert pas
-        //e_pas = -80
+        //e_pas = -65
         insert hh
         insert extracellular
         define_shape()

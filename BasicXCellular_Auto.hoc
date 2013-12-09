@@ -185,7 +185,7 @@ proc stimulate(){
                 fadvance()
             }
             // for recording membrane potentials
-            VmMatrix.setrow(numrow, vm_s)
+            VmMatrix.setrow(numrow, vm)
         }
         VmMatrix.fprint(0,APfile)
         APfile.close()

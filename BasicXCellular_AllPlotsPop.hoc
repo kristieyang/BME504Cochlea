@@ -108,8 +108,7 @@ objref phi_e, phi_ex, vm, APfile, VmMatrix, rmat, mobj, vecCurrent
 
 VmMatrix = new Matrix(NROW,tstop/dt+1)
 APfile=new File()
-APfile.wopen("
-             "Vm_Test.txt")
+APfile.wopen("Vm_Test.txt")
 
 rmat = new Matrix(NROW,NCOL)
 phi_e = new Vector(nnode,0)

@@ -1,26 +1,41 @@
 load_file("nrngui.hoc")
 load_proc("nrnmainmenu")
 
-create axon
+create axon, soma
 vinit = -65        //initial potential
+D = 1.5 //µm
 
 // initialize axon
 proc buildaxon() {
     axon{
         nnode = $1
         nseg=nnode
-        D = 1.5
         diam = 0.7*D //µm
         L = 907 //µm
         //Rm = 1000
         Ra = 100// axial resistivity (ohm-cm)
         cm = 2
-        insert pas
-        e_pas=-65
+        //insert pas
+        //e_pas=-65
         insert hh
         insert extracellular
         define_shape()
     }
+    
+    soma{
+        nseg=1
+        diam=25
+        L=25
+        Ra=150
+        cm=1
+        //insert pas
+        //e_pas = -65
+        insert hh
+        insert extracellular
+        define_shape()
+        
+    }
+    connect soma(0), axon(1)
 }
 
 buildaxon(7)
@@ -54,7 +69,7 @@ for i=0, nnode-1{
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -4.5   //mA
+AMP = -3.1   //mA
 DUR = .45
 DEL = 4
 //dt = 0.025
@@ -72,7 +87,7 @@ dummystim.del = DEL
 dummystim.dur = DUR
 
 // extracellular potentials
-objref phi_e, phi_ex, vm, APfile, VmMatrix, rmat, mobj, vecCurrent
+objref phi_e, phi_ex, vm, APfile, VmMatrix, rmat, mobj, vecCurrent,vm_s
 VmMatrix = new Matrix(NROW,tstop/dt+1)
 
 APfile=new File()
@@ -90,10 +105,15 @@ proc potential_field(){
         axon.e_extracellular(pos) = phi_e.x[i]
         phi_ex.set(i,AMP * (rho / 4 / PI)*(1/r)*10^4)
     }
+    soma.e_extracellular(0.5) = phi_e.x[nnode-1]
+
 }
 
 vm = new Vector(tstop/dt,0)
 vm.record(&axon.v(1))
+vm_s = new Vector(tstop/dt,0)
+vm_s.record(&soma.v(0.5))
+
 vecCurrent = new Vector(tstop/dt,0)
 vecCurrent.record(&dummystim.i)
 
@@ -138,13 +158,14 @@ objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
 vecCurrent.plot(g,dt)
+vm_s.plot(g,dt,2,2)
 vm.plot(g,dt,2,1)
 // Matt's Plot *******
 
 // Extracellular potential vs distance at one time point
 objref vec, g2
 g2 = new Graph()
-g2.size(0, L, -70,10)
+g2.size(0, L, -300,10)
 vec = phi_ex
 vec.plot(g2, pos_nx, 3,2)
 
@@ -156,12 +177,13 @@ vec.plot(g2, pos_nx, 3,2)
 objref rvp, g4
 proc snapshot(){
 
-tstop = DEL+DUR
+tstop = DEL+(DUR-.05)/2
+
 
 stimulate()
 rvp = new RangeVarPlot("v")
 axon(0) rvp.begin(0)
-axon(1) rvp.end(1)
+soma rvp.end(1)
 
 g4 = new Graph()
 g4.addobject(rvp)
@@ -178,20 +200,20 @@ objref pos_vec, rvp2, vspace_mat, vspace_vec, f
 proc spatialplots(){
     // show how node changes over time
     
-    vspace_mat = new Matrix(9,nnode+2)
+    vspace_mat = new Matrix(9,nnode+4)
     vspace_vec = new Vector(9)
-    count = 0
+    counter = 0
     for(k = DEL/dt; k < (DEL+DUR+9)/dt-1; k = k + 50) {
         tstop = (k)*dt
         stimulate()
         
         rvp2 = new RangeVarPlot("v")
         axon(0) rvp2.begin(0)
-        axon(1) rvp2.end(1)
+        soma rvp2.end(1)
         
         rvp2.to_vector(vspace_vec)
-        vspace_mat.setrow(count,vspace_vec)
-        count = count + 1
+        vspace_mat.setrow(counter,vspace_vec)
+        counter = counter + 1
     }
     
     f=new File()

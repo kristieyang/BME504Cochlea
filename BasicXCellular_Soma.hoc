@@ -4,7 +4,8 @@ load_proc("nrnmainmenu")
 create node[1], soma
 objref nodes
 vinit = -65        //initial potential
-INL = 100*1.5        // internodal length µm
+D = 3.567 //µm
+INL = 100*D        // internodal length µm
 
 // initialize axon-----------------------------------------------
 proc buildaxon() {local k
@@ -38,7 +39,6 @@ proc buildaxon() {local k
 // axon physical properties--------------------------------------
 proc physprop(){
     forsec nodes{
-        D = 1.5 //µm
         diam = 0.7*D //µm
         L = 1 // nodal length in µm
         nseg = 1
@@ -176,7 +176,7 @@ CVmat = new Matrix(3,tstop/dt+1)
 CVmat.setrow(0,vecCurrent)
 CVmat.setrow(1,vm[14])
 CVmat.setrow(2,vm[10])
-CVfile.wopen("CVfileMYE.txt")
+CVfile.wopen("CVfileMYE_2.txt")
 CVmat.fprint(0,CVfile)
 CVfile.close()
 

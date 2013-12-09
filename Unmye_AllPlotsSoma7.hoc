@@ -12,7 +12,7 @@ proc buildaxon() {
         nseg=nnode
         diam = 0.7*D //µm
         print diam
-        L =  3021//µm
+        L =  907//µm
         //Rm = 1000
         Ra = 110// axial resistivity (ohm-cm)
         cm = 1
@@ -40,7 +40,7 @@ proc buildaxon() {
 
 }
 
-buildaxon(21)
+buildaxon(7)
 
 
 //for keeping track of node positions and Ve at nodes
@@ -69,7 +69,7 @@ vm_s.record(&soma.v(0.5))
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -.115 //mA
+AMP = -.055 //mA
 DUR = .45
 DEL = 4
 tstop = 20
@@ -77,7 +77,7 @@ tstop = 20
 // set electrode pos
 rho = 500 //Ohm cm //ex_resistivity
 
-XE = 15*(1.5*100+1)+25  // µm
+XE = 3*(1.5*100+1)+25  // µm
 YE = 100  // µm
 ZE = 0    // µm //Define electrode position
 
@@ -134,19 +134,19 @@ objref CVfile, CVmat
 CVfile=new File()
 CVmat = new Matrix(3,tstop/dt+1)
 CVmat.setrow(0,vecCurrent)
-CVmat.setrow(1,vm[14])
-CVmat.setrow(2,vm[7])
-CVfile.wopen("CVfileUN_2.txt")
+CVmat.setrow(1,vm[3])
+CVmat.setrow(2,vm[nnode-1])
+CVfile.wopen("CVfileUN_3.txt")
 CVmat.fprint(0,CVfile)
 CVfile.close()
 
 objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
-vm[14].plot(g,dt)
+vm[3].plot(g,dt)
 vecCurrent.plot(g,dt,3,1)
 vm_s.plot(g,dt,2,2)
-vm[7].plot(g,dt,2,1)
+vm[nnode-1].plot(g,dt,2,1)
 // Matt's Plot *******
 
 // Extracellular potential vs distance at one time point

@@ -99,7 +99,7 @@ for i=0, nnode-1{
 
 // set electrode stim *******************************************
 
-AMP = -.155 //mA
+AMP = -.17 //mA
 DUR = .45
 DEL = 4
 tstop = 20

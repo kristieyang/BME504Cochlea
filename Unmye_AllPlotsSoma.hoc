@@ -69,7 +69,7 @@ vm_s.record(&soma.v(0.5))
 //The 'dummy' section has nothing to do with the fiber
 
 // set electrode stim *****
-AMP = -.105 //mA
+AMP = -.115 //mA
 DUR = .45
 DEL = 4
 tstop = 20
@@ -143,10 +143,10 @@ CVfile.close()
 objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
-vm[14].plot(g,dt)
+vm[10].plot(g,dt)
 vecCurrent.plot(g,dt,3,1)
 vm_s.plot(g,dt,2,2)
-vm[10].plot(g,dt,2,1)
+vm[9].plot(g,dt,2,1)
 // Matt's Plot *******
 
 // Extracellular potential vs distance at one time point

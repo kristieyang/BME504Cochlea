@@ -236,7 +236,7 @@ proc spatialplots(){
         
         rvp2 = new RangeVarPlot("v")
         node[0] rvp2.begin(0)
-        node[nnode-1] rvp2.end(1)
+        soma rvp2.end(1)
         
         rvp2.to_vector(vspace_vec)
         vspace_mat.setrow(count,vspace_vec)

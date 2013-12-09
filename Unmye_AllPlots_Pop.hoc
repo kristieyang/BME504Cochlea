@@ -13,7 +13,7 @@ proc buildaxon() {
         diam = 0.7*D //µm
         L = 907 //µm
         //Rm = 1000
-        Ra = 50// axial resistivity (ohm-cm)
+        Ra = 110// axial resistivity (ohm-cm)
         cm = 1
         //insert pas
         //e_pas=-65
@@ -26,7 +26,7 @@ proc buildaxon() {
         nseg=1
         diam=25
         L=25
-        Ra=50
+        Ra=110
         cm=1
         //insert pas
         //e_pas = -65

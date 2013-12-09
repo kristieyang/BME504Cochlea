@@ -52,9 +52,9 @@ proc membprop(){
         insert hh
         insert extracellular
         Rm = 1000
-        rhoa = 100      // axial resistivity (ohm-cm)
+        rhoa = 50      // axial resistivity (ohm-cm)
         Ra = rhoa*((INL+L)/L)
-        cm = 1
+        cm = 2
     }
     
 }
@@ -97,7 +97,7 @@ vm_s.record(&soma.v(0.5))
 
 // set electrode stim *******************************************
 
-AMP = -.035 //mA
+AMP = -.055 //mA
 DUR = .45
 DEL = 4
 //dt = 0.025

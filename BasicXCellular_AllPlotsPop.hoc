@@ -31,7 +31,7 @@ proc buildaxon() {local k
         define_shape()
         
     }
-    connect soma(1), node[nnode-1](0)
+    connect soma(0), node[nnode-1](0)
     finitialize(vinit)
 }
 // axon physical properties--------------------------------------
@@ -50,7 +50,7 @@ proc membprop(){
     forsec nodes{
         insert hh
         insert extracellular
-        rhoa = 50      // axial resistivity (ohm-cm)
+        rhoa = 110      // axial resistivity (ohm-cm)
         Ra = rhoa*((INL+L)/L)
         cm = 1
     }
@@ -98,7 +98,7 @@ for i=0, nnode-1{
 
 
 // set electrode stim *******************************************
-AMP = -0.076
+AMP = -.23
 DUR = .45
 DEL = 4
 tstop = 20

@@ -22,7 +22,7 @@ proc buildaxon() {local k
         nseg=1
         diam=25
         L=25
-        Ra=50
+        Ra=110
         cm=1
         //insert pas
         //e_pas = -65
@@ -51,7 +51,7 @@ proc membprop(){
     forsec nodes{
         insert hh
         insert extracellular
-        rhoa = 50      // axial resistivity (ohm-cm)
+        rhoa = 110      // axial resistivity (ohm-cm)
         Ra = rhoa*((INL+L)/L)
         cm = 1
     }

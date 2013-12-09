@@ -51,7 +51,7 @@ proc membprop(){
     forsec nodes{
         insert hh
         insert extracellular
-        Rm = 1000
+        //Rm = 1000
         rhoa = 100      // axial resistivity (ohm-cm)
         Ra = rhoa*((INL+L)/L)
         cm = 1

@@ -77,7 +77,7 @@ tstop = 20
 // set electrode pos
 rho = 500 //Ohm cm //ex_resistivity
 
-XE = 20*(1.5*100+1)+25  // µm
+XE = 15*(1.5*100+1)+25  // µm
 YE = 100  // µm
 ZE = 0    // µm //Define electrode position
 
@@ -134,8 +134,8 @@ objref CVfile, CVmat
 CVfile=new File()
 CVmat = new Matrix(3,tstop/dt+1)
 CVmat.setrow(0,vecCurrent)
-CVmat.setrow(1,vm[15])
-CVmat.setrow(2,vm[7])
+CVmat.setrow(1,vm[14])
+CVmat.setrow(2,vm[10])
 CVfile.wopen("CVfileUN_2.txt")
 CVmat.fprint(0,CVfile)
 CVfile.close()
@@ -143,10 +143,10 @@ CVfile.close()
 objref g
 g = new Graph()
 g.size(0,tstop,vinit-10,70)
-vm[15].plot(g,dt)
+vm[14].plot(g,dt)
 vecCurrent.plot(g,dt,3,1)
 vm_s.plot(g,dt,2,2)
-vm[7].plot(g,dt,2,1)
+vm[10].plot(g,dt,2,1)
 // Matt's Plot *******
 
 // Extracellular potential vs distance at one time point
